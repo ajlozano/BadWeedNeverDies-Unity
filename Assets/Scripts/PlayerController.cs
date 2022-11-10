@@ -11,18 +11,23 @@ public class PlayerController : MonoBehaviour
     [Header("Running properties")]
     public float maxSpeed;
     public float lerpTime;
-    
-    [Header("Fire properties")]
-    public float maxFireSpeed;
 
     [Header("Dash properties")]
     public float maxDashTime;
     public float maxDashSpeed;
 
+    [Header("Bullet properties")]
+    public GameObject _bullet;
+    public float maxBulletSpeed;
+
+
+
     // player
     private float _speed = 0.0f;
     private Vector2 _movementInput = Vector2.zero;
     private bool _isDashing = false;
+    private Ray _ray;
+    private RaycastHit _hit;
 
     // Time
     private float _timeElapsed = 0;
@@ -31,7 +36,6 @@ public class PlayerController : MonoBehaviour
     // objects
     //Gamepad gamepad;
     Camera _cam;
-    CharacterController _characterController;
     PlayerInputActions _playerControls;
     InputAction _move;
     InputAction _aim;
@@ -42,7 +46,6 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         _playerControls = new PlayerInputActions();
-        _characterController = GetComponent<CharacterController>();
         _cam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
     }
 
@@ -69,14 +72,14 @@ public class PlayerController : MonoBehaviour
     }
 
     private void Aim(InputAction.CallbackContext obj) {
-        
-        Debug.Log(obj.control.name);
-
+    
     }
     private void Move(InputAction.CallbackContext obj) {
-        Debug.Log(obj.control.name);
     }
-    private void Fire(InputAction.CallbackContext obj) {}
+    private void Fire(InputAction.CallbackContext obj) 
+    {
+        Instantiate(_bullet, transform.position, transform.rotation);
+    }
     private void Grab(InputAction.CallbackContext obj) {}
     private void Dash(InputAction.CallbackContext obj)
     {
@@ -91,7 +94,7 @@ public class PlayerController : MonoBehaviour
     private void StartDash()
     {
         _isDashing = true;
-        _characterController.Move(_movementInput.normalized * maxDashSpeed * Time.deltaTime);
+        transform.Translate(_movementInput.normalized * maxDashSpeed * Time.deltaTime, Space.World);
     }
 
     private void StopDash()
@@ -111,7 +114,9 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-    }
+        LineRenderer line = new LineRenderer();
+        Vector3[] positions = new Vector3[2];
+   }
 
     // Update is called once per frame
     void Update()
@@ -121,26 +126,37 @@ public class PlayerController : MonoBehaviour
 
         MovePlayer();
         RotatePlayer();
-    }
 
+        // Raycast test
+        RaycastHit2D hitInfo = Physics2D.Raycast(transform.position, transform.right);
+        Debug.DrawRay(transform.position, 
+            transform.right * 20, Color.red);
+
+        if (hitInfo != null)
+        {
+            Debug.Log(hitInfo.collider.gameObject + " was hit!");
+        }
+        
+    }
     private void RotatePlayer()
     {
-        // For cursor input
-        //Vector3 position = _cam.ScreenToWorldPoint(new Vector3(_aim.ReadValue<Vector2>().x, _aim.ReadValue<Vector2>().y, 0.0f));
-        //transform.eulerAngles = new Vector3(0, 0, Mathf.Atan2(position.y - transform.position.y,
-        //     position.x - transform.position.x) * Mathf.Rad2Deg);
 
-        Vector3 position = _aim.ReadValue<Vector2>().normalized;
-        if (position != Vector3.zero)
-            transform.eulerAngles = new Vector3(0, 0, Mathf.Atan2(position.y, position.x) * Mathf.Rad2Deg);
+       /*** for mouse cursor rotation ***/
+       Vector3 position = _cam.ScreenToWorldPoint(new Vector3(_aim.ReadValue<Vector2>().x, _aim.ReadValue<Vector2>().y, 0.0f));
+        transform.eulerAngles = new Vector3(0, 0, Mathf.Atan2(position.y - transform.position.y,
+             position.x - transform.position.x) * Mathf.Rad2Deg);
 
+        /*** for gamepad rotation ***/
+        //Vector3 position = _aim.ReadValue<Vector2>().normalized;
+        //if (position != Vector3.zero)
+        //    transform.eulerAngles = new Vector3(0, 0, Mathf.Atan2(position.y, position.x) * Mathf.Rad2Deg);
     }
 
     private void MovePlayer()
     {
         _movementInput = _move.ReadValue<Vector2>();
         _speed = _isDashing ? ManageDashSpeed() : ManageRunSpeed();
-        _characterController.Move(_movementInput.normalized * _speed * Time.deltaTime);
+        transform.Translate(_movementInput.normalized * _speed * Time.deltaTime, Space.World);
     }
 
     private float ManageRunSpeed()
@@ -162,5 +178,10 @@ public class PlayerController : MonoBehaviour
             StopDash();
 
         return maxDashSpeed;
+    }
+
+    public float GetBulletSpeed()
+    {
+        return maxBulletSpeed;
     }
 }
