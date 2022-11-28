@@ -72,7 +72,7 @@ public class EnemyBehavior : MonoBehaviour
     public void DisableHabilities(Transform t, GameObject obj)
     {
         _isGrabbed = true;
-        GetComponent<Rigidbody2D>().isKinematic = true;
+        //GetComponent<Rigidbody2D>().isKinematic = true;
         GetComponent<Rigidbody2D>().simulated = false;
         transform.position = obj.transform.position;
         transform.rotation = obj.transform.rotation;
@@ -80,7 +80,7 @@ public class EnemyBehavior : MonoBehaviour
     }
     public void EnableHabilities()
     {
-        GetComponent<Rigidbody2D>().isKinematic = false;
+        //GetComponent<Rigidbody2D>().isKinematic = false;
         GetComponent<Rigidbody2D>().simulated = true;
         transform.SetParent(null);
         _isGrabbed = false;
@@ -88,7 +88,7 @@ public class EnemyBehavior : MonoBehaviour
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (_isThrowing)
+        if ((_isThrowing) && (collision.transform.tag != "Player"))
         {
             _isThrowing = false;
             _throwingTimeElapsed = 0;
