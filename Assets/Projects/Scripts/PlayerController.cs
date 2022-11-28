@@ -112,19 +112,23 @@ public class PlayerController : MonoBehaviour
         _isGrabbing = _grab.IsPressed();
         if (_isGrabbing)
         {
-            // Raycast config
-            RaycastHit2D hitInfo = Physics2D.Raycast(transform.position, transform.right, grabLength, _layerMask);
-            if ((hitInfo) && (hitInfo.transform.gameObject.layer == LayerMask.NameToLayer("Enemy")))
+            if (_grabbedEnemy == null)
             {
-                _grabbedEnemy = hitInfo.transform.gameObject;
-                EnemyBehavior enemy = _grabbedEnemy.GetComponent<EnemyBehavior>();
-                if (enemy != null)
+                // Raycast config
+                RaycastHit2D hitInfo = Physics2D.Raycast(transform.position, transform.right, grabLength, _layerMask);
+                if ((hitInfo) && (hitInfo.transform.gameObject.layer == LayerMask.NameToLayer("Enemy")))
                 {
-                    enemy.DisableHabilities(transform, _grabPoint);
-                    _grabbedEnemy.GetComponent<SpriteRenderer>().color = Color.red;
-                    Debug.Log(hitInfo.transform.tag + " was hit!");
+                    _grabbedEnemy = hitInfo.transform.gameObject;
+                    EnemyBehavior enemy = _grabbedEnemy.GetComponent<EnemyBehavior>();
+                    if (enemy != null)
+                    {
+                        enemy.DisableHabilities(transform, _grabPoint);
+                        _grabbedEnemy.GetComponent<SpriteRenderer>().color = Color.red;
+                        Debug.Log(hitInfo.transform.tag + " was hit!");
+                    }
                 }
             }
+
         }
         else if (_grabbedEnemy != null)
         {
