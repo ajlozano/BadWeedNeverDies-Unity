@@ -1,15 +1,22 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
+using static UnityEditor.Experimental.GraphView.GraphView;
+
 public class PlayerController : MonoBehaviour
 {
     // edit on Inspector
     [Header("Running properties")]
     public float maxSpeed;
     public float lerpTime;
+
+    [Header("Grab properties")]
+    public float grabLength = 5f;
+    public Vector2 enemyThrowForce = new Vector2(5f, 0f); 
 
     [Header("Dash properties")]
     public float maxDashTime;
@@ -19,14 +26,12 @@ public class PlayerController : MonoBehaviour
     public GameObject _bullet;
     public float maxBulletSpeed;
 
-
-
     // player
     private float _speed = 0.0f;
     private Vector2 _movementInput = Vector2.zero;
     private bool _isDashing = false;
-    private Ray _ray;
-    private RaycastHit _hit;
+    private bool _isGrabbing = false;
+    private int _layerMask;  //User layer 2
 
     // Time
     private float _timeElapsed = 0;
@@ -34,8 +39,10 @@ public class PlayerController : MonoBehaviour
 
     // objects
     //Gamepad gamepad;
+    GameObject _grabbedEnemy;
     Camera _cam;
     PlayerInputActions _playerControls;
+    GameObject _grabPoint;
     InputAction _move;
     InputAction _aim;
     InputAction _fire;
@@ -46,6 +53,7 @@ public class PlayerController : MonoBehaviour
     {
         _playerControls = new PlayerInputActions();
         _cam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+        _grabPoint = GameObject.Find("GrabPoint");
     }
 
     private void OnEnable()
@@ -70,38 +78,6 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    private void Aim(InputAction.CallbackContext obj) {
-    
-    }
-    private void Move(InputAction.CallbackContext obj) {
-    }
-    private void Fire(InputAction.CallbackContext obj) 
-    {
-        Instantiate(_bullet, transform.position, transform.rotation);
-    }
-    private void Grab(InputAction.CallbackContext obj) {}
-    private void Dash(InputAction.CallbackContext obj)
-    {
-        if (!_isDashing)
-        {
-            _dashingTimeElapsed = 0;
-            if (_movementInput.magnitude > 0.1f)
-                StartDash();
-        }
-    }
-
-    private void StartDash()
-    {
-        _isDashing = true;
-        transform.Translate(_movementInput.normalized * maxDashSpeed * Time.deltaTime, Space.World);
-    }
-
-    private void StopDash()
-    {
-        _isDashing= false;
-        _dashingTimeElapsed = 0;
-    }
-
     private void OnDisable()
     {
         _move.Disable();
@@ -115,34 +91,76 @@ public class PlayerController : MonoBehaviour
     {
         LineRenderer line = new LineRenderer();
         Vector3[] positions = new Vector3[2];
-   }
+        // I don't know why, move 1 more bit to left is needed for correct layer mask.
+        _layerMask = LayerMask.NameToLayer("Ignore Raycast") << 1;
+        _layerMask = ~_layerMask;
+    }
 
     // Update is called once per frame
     void Update()
     {
         // Only main player actions placed directly on Update()
         // Other actions must be placed as a coroutine.
-
         MovePlayer();
-        RotatePlayer();
-
-        // Raycast test
-        RaycastHit2D hitInfo = Physics2D.Raycast(transform.position, transform.right);
-        Debug.DrawRay(transform.position, 
-            transform.right * 20, Color.red);
-
-        if (hitInfo != null)
-        {
-            Debug.Log(hitInfo.collider.gameObject + " was hit!");
-        }
-        
+        RotatePlayer();     
+        GrabEnemyManagement();
     }
+
+    private void GrabEnemyManagement()
+    {
+        Debug.DrawRay(transform.position, transform.right * grabLength, Color.red);
+        _isGrabbing = _grab.IsPressed();
+        if (_isGrabbing)
+        {
+            // Raycast config
+            RaycastHit2D hitInfo = Physics2D.Raycast(transform.position, transform.right, grabLength, _layerMask);
+            if ((hitInfo) && (hitInfo.transform.gameObject.layer == LayerMask.NameToLayer("Enemy")))
+            {
+                _grabbedEnemy = hitInfo.transform.gameObject;
+                EnemyBehavior enemy = _grabbedEnemy.GetComponent<EnemyBehavior>();
+                if (enemy != null)
+                {
+                    enemy.DisableHabilities(transform, _grabPoint);
+                    _grabbedEnemy.GetComponent<SpriteRenderer>().color = Color.red;
+                    Debug.Log(hitInfo.transform.tag + " was hit!");
+                }
+            }
+        }
+        else if (_grabbedEnemy != null)
+        {
+            EnemyBehavior enemy = _grabbedEnemy.GetComponent<EnemyBehavior>();
+            if (enemy != null)
+            {
+                enemy.EnableHabilities();
+                _grabbedEnemy.GetComponent<SpriteRenderer>().color = Color.blue;
+                _grabbedEnemy = null;
+            }
+        }
+
+    }
+
+    private void Aim(InputAction.CallbackContext obj){}
+    private void Move(InputAction.CallbackContext obj){}
+    private void Grab(InputAction.CallbackContext obj){}
+    private void Fire(InputAction.CallbackContext obj)
+    {
+        Instantiate(_bullet, transform.position, transform.rotation);
+    }
+    private void Dash(InputAction.CallbackContext obj)
+    {
+        if (!_isDashing)
+        {
+            _dashingTimeElapsed = 0;
+            if (_movementInput.magnitude > 0.1f)
+                StartDash();
+        }
+    }
+
     private void RotatePlayer()
     {
-
        /*** for mouse cursor rotation ***/
        Vector3 position = _cam.ScreenToWorldPoint(new Vector3(_aim.ReadValue<Vector2>().x, _aim.ReadValue<Vector2>().y, 0.0f));
-        transform.eulerAngles = new Vector3(0, 0, Mathf.Atan2(position.y - transform.position.y,
+       transform.eulerAngles = new Vector3(0, 0, Mathf.Atan2(position.y - transform.position.y,
              position.x - transform.position.x) * Mathf.Rad2Deg);
 
         /*** for gamepad rotation ***/
@@ -156,6 +174,11 @@ public class PlayerController : MonoBehaviour
         _movementInput = _move.ReadValue<Vector2>();
         _speed = _isDashing ? ManageDashSpeed() : ManageRunSpeed();
         transform.Translate(_movementInput.normalized * _speed * Time.deltaTime, Space.World);
+    }
+
+    private void GrabManagement(RaycastHit2D hitInfo)
+    {
+
     }
 
     private float ManageRunSpeed()
@@ -175,12 +198,22 @@ public class PlayerController : MonoBehaviour
         _dashingTimeElapsed += Time.deltaTime;
         if (_dashingTimeElapsed > maxDashTime)
             StopDash();
-
         return maxDashSpeed;
     }
 
     public float GetBulletSpeed()
     {
         return maxBulletSpeed;
+    }
+    private void StartDash()
+    {
+        _isDashing = true;
+        transform.Translate(_movementInput.normalized * maxDashSpeed * Time.deltaTime, Space.World);
+    }
+
+    private void StopDash()
+    {
+        _isDashing = false;
+        _dashingTimeElapsed = 0;
     }
 }
