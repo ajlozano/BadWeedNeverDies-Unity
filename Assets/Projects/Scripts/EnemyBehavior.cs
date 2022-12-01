@@ -11,47 +11,79 @@ public class EnemyBehavior : MonoBehaviour
     public EnemyData enemyData;
 
     // Enemy
+    [HideInInspector]
+    public bool _isDying;
+    [HideInInspector]
+    public bool _isTransformed = false;
     private bool _isGrabbed = false;
     private bool _isThrowing = false;
     private float _throwingTimeElapsed = 0;
-    private bool _isTransformed
-    {
-        get { return _isTransformed; }
-    }
+
     // objects
     private GameObject _player;
+    private GameObject _body;
+    private Animator _anim;
+
+    private void Awake()
+    {
+        _player = GameObject.Find("Player");
+        _body = transform.Find("Body").gameObject;
+        _anim = this.GetComponent<Animator>();
+    }
     // Start is called before the first frame update
     void Start()
     {
-        _player = GameObject.Find("Player");
     }
 
     // Update is called once per frame
     void Update()
     {
+
         if (!_isGrabbed)
         {
             if (!_isThrowing)
             {
                 if (_player != null)
                 {
-                    FollowPlayer();
+                    MoveEnemy();
+                }
+                if (!_isTransformed)
+                {
+                    if (_isDying)
+                    {
+                        // Add dying process?
+                    }
                 }
             }
-            else
-            {
-                _throwingTimeElapsed += Time.deltaTime;
-                ThrowItself();
-            }
+        }
+        if (_isThrowing)
+        {
+            _throwingTimeElapsed += Time.deltaTime;
+            ThrowItself();
         }
     }
-    private void FollowPlayer()
+    private void AnimationManagement()
+    {
+        if (_anim != null)
+        {
+            _anim.SetBool("isDying", _isDying);
+        }
+    }
+    private void MoveEnemy()
     {
         Vector2 relativePos = _player.transform.position - transform.position;
-        Quaternion current = transform.localRotation;
-        Quaternion rotation = Quaternion.Euler(0, 0, Mathf.Atan2(relativePos.y, relativePos.x) * Mathf.Rad2Deg);
-        transform.localRotation = Quaternion.Slerp(current, rotation, Time.deltaTime * enemyData.maxRotationSlerp);
-        transform.Translate(Vector2.right * enemyData.maxSpeed * Time.deltaTime);
+
+        if (!_isGrabbed)
+            transform.GetComponent<Rigidbody2D>().velocity = relativePos.normalized * enemyData.maxSpeed;
+
+        if (relativePos.normalized.x < 0f)
+        {
+            _body.transform.eulerAngles = new Vector3(0, 180, 0);
+        }
+        else
+        {
+            _body.transform.eulerAngles = new Vector3(0, 0, 0);
+        }
     }
     private void ThrowItself()
     {
@@ -62,21 +94,22 @@ public class EnemyBehavior : MonoBehaviour
         }
         else
         {
-            GetComponent<Rigidbody2D>().velocity = Vector2.right * enemyData.maxSpeedThrowing;
+            //transform.Translate(Vector2.right * enemyData.maxSpeedThrowing * Time.deltaTime);
+            GetComponent<Rigidbody2D>().velocity = this.transform.right * enemyData.maxSpeedThrowing;
         }
     }
     public void DisableHabilities(Transform t, GameObject obj)
     {
         _isGrabbed = true;
-        //GetComponent<Rigidbody2D>().isKinematic = true;
+        GetComponent<Rigidbody2D>().isKinematic = true;
         GetComponent<Rigidbody2D>().simulated = false;
         transform.position = obj.transform.position;
         transform.rotation = obj.transform.rotation;
-        transform.SetParent(t);
+        transform.SetParent(obj.transform);
     }
     public void EnableHabilities()
     {
-        //GetComponent<Rigidbody2D>().isKinematic = false;
+        GetComponent<Rigidbody2D>().isKinematic = false;
         GetComponent<Rigidbody2D>().simulated = true;
         transform.SetParent(null);
         _isGrabbed = false;
@@ -86,6 +119,8 @@ public class EnemyBehavior : MonoBehaviour
     {
         if ((_isThrowing) && (collision.transform.tag != "Player"))
         {
+            transform.rotation = Quaternion.identity;
+            _isGrabbed = false;
             _isThrowing = false;
             _throwingTimeElapsed = 0;
         }

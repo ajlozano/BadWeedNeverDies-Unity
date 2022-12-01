@@ -65,15 +65,6 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         _playerControls = new PlayerInputActions();
-        _cam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
-        _grabPoint = GameObject.Find("GrabPoint");
-        _weapon = GameObject.Find("Weapon");
-        _body = GameObject.Find("Body");
-        _muzzle = _weapon.transform.Find("Muzzle");
-        _muzzle.gameObject.SetActive(false);
-        _anim = GameObject.Find("Body").GetComponent<Animator>();
-        print("Animator: " + _anim);
-
     }
     private void OnEnable()
     {
@@ -101,16 +92,18 @@ public class PlayerController : MonoBehaviour
         _fire.Disable();
         _dash.Disable();
         _grab.Disable();
-
     }
     private void Aim(InputAction.CallbackContext obj) {}
     private void Move(InputAction.CallbackContext obj) {}
     private void Grab(InputAction.CallbackContext obj) {}
     private void Fire(InputAction.CallbackContext obj)
     {
-        Instantiate(_bullet, _muzzle.position, _muzzle.transform.rotation);
-        _muzzle.gameObject.SetActive(true);
-        _muzzleCountdown = MAX_MUZZLE_TIME;
+        if (!_isGrabbing)
+        {
+            Instantiate(_bullet, _muzzle.position, _muzzle.transform.rotation);
+            _muzzle.gameObject.SetActive(true);
+            _muzzleCountdown = MAX_MUZZLE_TIME;
+        }
     }
     private void Dash(InputAction.CallbackContext obj)
     {
@@ -126,13 +119,17 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        _cam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+        _weapon = transform.Find("Weapon").gameObject;
+        _body = transform.Find("Body").gameObject;
+        _muzzle = _weapon.transform.Find("Muzzle");
+        _muzzle.gameObject.SetActive(false);
+        _grabPoint = _weapon.transform.Find("Crosshair").gameObject;
+        _anim = transform.Find("Body").GetComponent<Animator>();
 
-        LineRenderer line = new LineRenderer();
-        Vector3[] positions = new Vector3[2];
         // I don't know why, move 1 more bit to left is needed for correct layer mask.
         _layerMask = LayerMask.NameToLayer("Ignore Raycast") << 1;
         _layerMask = ~_layerMask;
-
     }
     // Update is called once per frame
     void Update()
@@ -141,8 +138,8 @@ public class PlayerController : MonoBehaviour
         // Other actions must be placed as a coroutine.
         MovePlayer();
         RotatePlayer();     
-        GrabEnemyManagement();
-        AnimationManagement();
+        ManageEnemyGrab();
+        ManageAnimation();
     }
     private void FixedUpdate()
     {
@@ -156,14 +153,18 @@ public class PlayerController : MonoBehaviour
             _muzzle.gameObject.SetActive(false);
         }
     }
-    private void AnimationManagement()
+    private void ManageAnimation()
     {
-        _anim.SetBool("isWalking", _move.IsPressed());
-        _anim.SetBool("isDashing", false);
+        if (_anim != null)
+        {
+            _anim.SetBool("isWalking", _move.IsPressed());
+            _anim.SetBool("isDashing", false);
+        }
+
     }
-    private void GrabEnemyManagement()
+    private void ManageEnemyGrab()
     {
-        Debug.DrawRay(_muzzle.transform.position, _muzzle.transform.right * grabLength, Color.red);
+        Debug.DrawRay(_grabPoint.transform.position, _muzzle.transform.right * grabLength, Color.red);
         _isGrabbing = _grab.IsPressed();
 
         if (_isGrabbing)
@@ -172,15 +173,16 @@ public class PlayerController : MonoBehaviour
             {
                 print("Is grabbing");
                 // Raycast config
-                RaycastHit2D hitInfo = Physics2D.Raycast(_muzzle.transform.position, _muzzle.transform.right, grabLength, _layerMask);
+                RaycastHit2D hitInfo = Physics2D.Raycast(_grabPoint.transform.position, _muzzle.transform.right, grabLength, _layerMask);
                 if ((hitInfo) && (hitInfo.transform.gameObject.layer == LayerMask.NameToLayer("Enemy")))
                 {
                     _grabbedEnemy = hitInfo.transform.gameObject;
                     EnemyBehavior enemy = _grabbedEnemy.GetComponent<EnemyBehavior>();
-                    if (enemy != null)
+                    // Check if invencible enemy is enabled
+
+                    if ((enemy != null) && (!enemy._isTransformed))
                     {
                         enemy.DisableHabilities(_muzzle.transform, _grabPoint);
-                        _grabbedEnemy.GetComponent<SpriteRenderer>().color = Color.red;
                     }
                 }
             }
@@ -191,7 +193,6 @@ public class PlayerController : MonoBehaviour
             if (enemy != null)
             {
                 enemy.EnableHabilities();
-                _grabbedEnemy.GetComponent<SpriteRenderer>().color = Color.blue;
                 _grabbedEnemy = null;
             }
         }
@@ -211,13 +212,18 @@ public class PlayerController : MonoBehaviour
         if ((aimingEuler.z > 90) || (aimingEuler.z < -90))
         {
             _weapon.transform.eulerAngles = new Vector3(0, 180, 180 - aimingEuler.z);
-            _body.transform.eulerAngles = new Vector3(0, 180, 0);
+            _body.transform.eulerAngles = new Vector3(0, 180f, 0);
+            //_body.GetComponent<SpriteRenderer>().flipX = true;
+            print(_body.transform.eulerAngles);
             _weapon.transform.Find("Shotgun").GetComponent<SpriteRenderer>().sortingOrder = 1;
         }
         else
         {
             _weapon.transform.eulerAngles = aimingEuler;
             _body.transform.eulerAngles = new Vector3(0, 0, 0);
+            //_body.GetComponent<SpriteRenderer>().flipX = false;
+
+            print(_body.transform.eulerAngles);
             _weapon.transform.Find("Shotgun").GetComponent<SpriteRenderer>().sortingOrder = 2;
         }
     }

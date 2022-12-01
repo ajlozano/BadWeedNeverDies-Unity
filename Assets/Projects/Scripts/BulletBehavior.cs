@@ -26,7 +26,6 @@ public class BulletBehavior : MonoBehaviour
     {
         transform.Translate(Vector3.right * _bulletSpeed * Time.deltaTime);
     }
-
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if((collision.gameObject.tag == "Enemy") || (collision.gameObject.tag == "Wall"))
@@ -35,11 +34,11 @@ public class BulletBehavior : MonoBehaviour
             Destroy(_impactObjectSpawned, 5.0f);
             if (collision.gameObject.tag == "Enemy")
             {
+                collision.gameObject.GetComponent<EnemyBehavior>()._isDying = true;
                 _explosionObjectSpawned = Instantiate(targetExplosionEffect, collision.transform.position, collision.transform.rotation);
                 _explosionObjectSpawned.transform.localScale = collision.transform.localScale;
                 Destroy(_explosionObjectSpawned, 5.0f);
 
-                collision.gameObject.GetComponent<SpriteRenderer>().color = Color.white;
                 Destroy(collision.gameObject);
             }
 
