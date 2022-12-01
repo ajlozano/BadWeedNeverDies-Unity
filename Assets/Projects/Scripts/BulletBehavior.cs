@@ -8,18 +8,12 @@ public class BulletBehavior : MonoBehaviour
     [Header("Effect objects to inlcude")]
     public GameObject impactEffect;
     public GameObject targetExplosionEffect;
+
     [SerializeField]
     private float _bulletSpeed = 10;
-    private GameObject player;
 
-    // process to destroy
-    //private bool _isHit = false;
-    //private float _destroyTimeElapsed = 0.0f;
-    //private float _timeToDestroy = 1.0f;
     private GameObject _impactObjectSpawned;
     private GameObject _explosionObjectSpawned;
-
-
     // Start is called before the first frame update
     void Start()
     {
@@ -31,23 +25,11 @@ public class BulletBehavior : MonoBehaviour
     void Update()
     {
         transform.Translate(Vector3.right * _bulletSpeed * Time.deltaTime);
-
-        // time to destroy objects after impact
-        //if (_isHit)
-        //{
-        //    _destroyTimeElapsed += Time.deltaTime;
-        //    if (_destroyTimeElapsed > _timeToDestroy)
-        //        DestroyObjects();
-        //}
-    }
-
-    private void DestroyObjects()
-    {
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if((collision.gameObject.tag == "Enemy") || (collision.gameObject.tag == "Scenario"))
+        if((collision.gameObject.tag == "Enemy") || (collision.gameObject.tag == "Wall"))
         {
             _impactObjectSpawned = Instantiate(impactEffect, transform.position, transform.rotation);
             Destroy(_impactObjectSpawned, 5.0f);

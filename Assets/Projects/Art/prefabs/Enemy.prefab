@@ -146,7 +146,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1751f4fff50912345a63ba6a0c224924, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxSpeed: 5
-  maxRotationSlerp: 5
-  maxTimeThrowing: 1
-  maxSpeedThrowing: 30
+  enemyData: {fileID: 11400000, guid: 16ce4e2fdda6d5e43a80c9d0ebedee5a, type: 2}

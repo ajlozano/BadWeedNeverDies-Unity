@@ -8,16 +8,12 @@ public class EnemyBehavior : MonoBehaviour
 {
     // edit in inspector
     [Header("Enemy properties")]
-    public float maxSpeed;
-    public float maxRotationSlerp;
-    public float maxTimeThrowing;
-    public float maxSpeedThrowing;
+    public EnemyData enemyData;
 
     // Enemy
     private bool _isGrabbed = false;
     private bool _isThrowing = false;
     private float _throwingTimeElapsed = 0;
-
     private bool _isTransformed
     {
         get { return _isTransformed; }
@@ -54,19 +50,19 @@ public class EnemyBehavior : MonoBehaviour
         Vector2 relativePos = _player.transform.position - transform.position;
         Quaternion current = transform.localRotation;
         Quaternion rotation = Quaternion.Euler(0, 0, Mathf.Atan2(relativePos.y, relativePos.x) * Mathf.Rad2Deg);
-        transform.localRotation = Quaternion.Slerp(current, rotation, Time.deltaTime * maxRotationSlerp);
-        transform.Translate(Vector2.right * maxSpeed * Time.deltaTime);
+        transform.localRotation = Quaternion.Slerp(current, rotation, Time.deltaTime * enemyData.maxRotationSlerp);
+        transform.Translate(Vector2.right * enemyData.maxSpeed * Time.deltaTime);
     }
     private void ThrowItself()
     {
-        if (_throwingTimeElapsed >= maxTimeThrowing)
+        if (_throwingTimeElapsed >= enemyData.maxTimeThrowing)
         {
             _isThrowing = false;
             _throwingTimeElapsed = 0;
         }
         else
         {
-            transform.Translate(Vector2.right * maxSpeedThrowing * Time.deltaTime);
+            GetComponent<Rigidbody2D>().velocity = Vector2.right * enemyData.maxSpeedThrowing;
         }
     }
     public void DisableHabilities(Transform t, GameObject obj)
