@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Wall
   - Enemy
+  - FxTemporaire
+  - Transparent
+  - Altar
   layers:
   - Default
   - TransparentFX

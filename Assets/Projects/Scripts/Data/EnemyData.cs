@@ -13,4 +13,6 @@ public class EnemyData : ScriptableObject
     public float maxTimeToTransform;
     public float damage;
     public GameObject deathParticle;
+    public GameObject teleportParticle;
+    public GameObject spawnParticle;
 }

@@ -29,19 +29,16 @@ public class BulletBehavior : MonoBehaviour
     {
         transform.Translate(Vector3.right * _bulletSpeed * Time.deltaTime);
     }
-    private void OnCollisionEnter2D(Collision2D collision)
+
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if((collision.gameObject.tag == "Enemy") || (collision.gameObject.tag == "Wall"))
+        if ((collision.gameObject.tag == "Enemy") || (collision.gameObject.tag == "Wall"))
         {
             _impactObjectSpawned = Instantiate(impactEffect, transform.position, transform.rotation);
             Destroy(_impactObjectSpawned, 1.0f);
             if (collision.gameObject.tag == "Enemy")
             {
                 collision.gameObject.GetComponent<EnemyBehavior>().SetDamage(damage);
-                //_explosionObjectSpawned = Instantiate(targetExplosionEffect, collision.transform.position, collision.transform.rotation);
-                //_explosionObjectSpawned.transform.localScale = collision.transform.localScale;
-                //Destroy(_explosionObjectSpawned, 5.0f);
-                //Destroy(collision.gameObject);
             }
 
             Destroy(this.gameObject);

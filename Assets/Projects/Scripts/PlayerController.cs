@@ -47,11 +47,6 @@ public class PlayerController : MonoBehaviour
     private float _dieTimeElapsed = 0;
     private float _maxDieTime = 1f;
 
-    //Animation IDs
-    private int isWalking;
-    private int isDying;
-    private int isDashing;
-
     // objects
     //Gamepad gamepad;
     GameObject _grabbedEnemy;
@@ -109,10 +104,7 @@ public class PlayerController : MonoBehaviour
     {
 
         // TODO: asignar correectamente las partículas
-        if (_grabAimParticle != null)
-        {
-            _grabAimParticle.SetActive(true);
-        }
+
     }
     private void Fire(InputAction.CallbackContext obj)
     {
@@ -143,8 +135,10 @@ public class PlayerController : MonoBehaviour
         _grabPoint = _weapon.transform.Find("Crosshair").gameObject;
         _anim = this.transform.Find("Body").GetComponent<Animator>();
 
-        _grabAimParticle = this.transform.Find("LightGrab").gameObject;
-        _grabEnemyParticle = this.transform.Find("ElectricGrab").gameObject;
+        _grabAimParticle = _weapon.transform.Find("GrabParticle").gameObject;
+        _grabAimParticle.SetActive(false);
+        EnableAltars(true);
+        //_grabEnemyParticle = this.transform.Find("ElectricGrab").gameObject;
         // I don't know why, move 1 more bit to left is needed for correct layer mask.
         _layerMask = LayerMask.NameToLayer("Ignore Raycast") << 1;
         _layerMask = ~_layerMask;
@@ -195,9 +189,13 @@ public class PlayerController : MonoBehaviour
 
         if (_isGrabbing)
         {
+            if (_grabAimParticle != null)
+            {
+                _grabAimParticle.SetActive(true);
+            }
+
             if (_grabbedEnemy == null)
             {
-                print("Is grabbing");
                 // Raycast config
                 RaycastHit2D hitInfo = Physics2D.Raycast(_grabPoint.transform.position, _muzzle.transform.right, grabLength, _layerMask);
                 if ((hitInfo) && (hitInfo.transform.gameObject.layer == LayerMask.NameToLayer("Enemy")))
@@ -213,20 +211,48 @@ public class PlayerController : MonoBehaviour
                             _grabbedEnemy = null;
                             enemy = null;
                         }
+                        else
+                        {
+                            if (_grabAimParticle != null)
+                            {
+                                _grabAimParticle.SetActive(false);
+                            }
+                        }
                     }
                 }
             }
         }
-        else if (_grabbedEnemy != null)
+        else 
         {
-            EnemyBehavior enemy = _grabbedEnemy.GetComponent<EnemyBehavior>();
-            if (enemy != null)
+            if (_grabAimParticle != null)
             {
-                enemy.EnableHabilities();
-                _grabbedEnemy = null;
+                _grabAimParticle.SetActive(false);
+            }
+
+
+            if (_grabbedEnemy != null)
+            {
+                EnemyBehavior enemy = _grabbedEnemy.GetComponent<EnemyBehavior>();
+                if (enemy != null)
+                {
+                    enemy.EnableHabilities();
+                    _grabbedEnemy = null;
+                }
             }
         }
     }
+
+    public void EnableAltars(bool v)
+    {
+        GameObject[] altars = GameObject.FindGameObjectsWithTag("Altar");
+        foreach (var altar in altars)
+        {
+            GameObject teleport = altar.transform.Find("Teleport").gameObject;
+            if (teleport != null)
+                teleport.SetActive(v);
+        }
+    }
+
     private void RotatePlayer()
     {
         /*** for mouse cursor rotation ***/
@@ -310,7 +336,6 @@ public class PlayerController : MonoBehaviour
         }
 
     }
-
     private void DeathCycle()
     {
         GetComponent<Rigidbody2D>().isKinematic = true;
