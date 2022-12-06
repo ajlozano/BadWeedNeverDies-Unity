@@ -11,4 +11,6 @@ public class EnemyData : ScriptableObject
     public float maxSpeedThrowing;
     public float maxHealth;
     public float maxTimeToTransform;
+    public float damage;
+    public GameObject deathParticle;
 }

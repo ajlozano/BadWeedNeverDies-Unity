@@ -140,4 +140,5 @@ MonoBehaviour:
     type: 3}
   targetExplosionEffect: {fileID: 141433446842962269, guid: 9fe8f8b3288e45a44af36ff8aa04486e,
     type: 3}
+  damage: 50
   _bulletSpeed: 10

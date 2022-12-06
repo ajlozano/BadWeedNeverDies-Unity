@@ -6,6 +6,7 @@ using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.SceneManagement;
 using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class PlayerController : MonoBehaviour
@@ -32,18 +33,23 @@ public class PlayerController : MonoBehaviour
     // player
     private float _speed = 0.0f;
     private Vector2 _movementInput = Vector2.zero;
-    private bool _isMakingDash = false;
+    private bool _isDashing = false;
     private bool _isGrabbing = false;
+    private bool _isDying = false   ;
     private int _layerMask;  //User layer 2
+    [SerializeField]
+    private float _health = 100;
 
     // Time
     private float _timeElapsed = 0;
     private float _dashingTimeElapsed = 0;
     private float _muzzleCountdown = 0;
+    private float _dieTimeElapsed = 0;
+    private float _maxDieTime = 1f;
 
     //Animation IDs
     private int isWalking;
-    private int _isDying;
+    private int isDying;
     private int isDashing;
 
     // objects
@@ -54,6 +60,9 @@ public class PlayerController : MonoBehaviour
     GameObject _grabPoint;
     GameObject _weapon;
     GameObject _body;
+    GameObject _grabAimParticle;
+    GameObject _grabEnemyParticle;
+
     Transform _muzzle;
     Animator _anim;
     InputAction _move;
@@ -65,6 +74,7 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         _playerControls = new PlayerInputActions();
+
     }
     private void OnEnable()
     {
@@ -95,7 +105,15 @@ public class PlayerController : MonoBehaviour
     }
     private void Aim(InputAction.CallbackContext obj) {}
     private void Move(InputAction.CallbackContext obj) {}
-    private void Grab(InputAction.CallbackContext obj) {}
+    private void Grab(InputAction.CallbackContext obj) 
+    {
+
+        // TODO: asignar correectamente las partículas
+        if (_grabAimParticle != null)
+        {
+            _grabAimParticle.SetActive(true);
+        }
+    }
     private void Fire(InputAction.CallbackContext obj)
     {
         if (!_isGrabbing)
@@ -107,9 +125,7 @@ public class PlayerController : MonoBehaviour
     }
     private void Dash(InputAction.CallbackContext obj)
     {
-        print("Dashing!");
-
-        if (!_isMakingDash)
+        if (!_isDashing)
         {
             _dashingTimeElapsed = 0;
             if (_movementInput.magnitude > 0.1f)
@@ -120,13 +136,15 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         _cam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
-        _weapon = transform.Find("Weapon").gameObject;
-        _body = transform.Find("Body").gameObject;
+        _weapon = this.transform.Find("Weapon").gameObject;
+        _body = this.transform.Find("Body").gameObject;
         _muzzle = _weapon.transform.Find("Muzzle");
         _muzzle.gameObject.SetActive(false);
         _grabPoint = _weapon.transform.Find("Crosshair").gameObject;
-        _anim = transform.Find("Body").GetComponent<Animator>();
+        _anim = this.transform.Find("Body").GetComponent<Animator>();
 
+        _grabAimParticle = this.transform.Find("LightGrab").gameObject;
+        _grabEnemyParticle = this.transform.Find("ElectricGrab").gameObject;
         // I don't know why, move 1 more bit to left is needed for correct layer mask.
         _layerMask = LayerMask.NameToLayer("Ignore Raycast") << 1;
         _layerMask = ~_layerMask;
@@ -152,6 +170,11 @@ public class PlayerController : MonoBehaviour
             _muzzleCountdown = 0;
             _muzzle.gameObject.SetActive(false);
         }
+
+        if (_isDying)
+        {
+            DeathCycle();
+        }
     }
     private void ManageAnimation()
     {
@@ -160,6 +183,9 @@ public class PlayerController : MonoBehaviour
             _anim.SetBool("isWalking", _move.IsPressed());
             _anim.SetBool("isDashing", false);
         }
+
+        if (_isDying)
+            _anim.SetBool("isDying", true);
 
     }
     private void ManageEnemyGrab()
@@ -178,11 +204,15 @@ public class PlayerController : MonoBehaviour
                 {
                     _grabbedEnemy = hitInfo.transform.gameObject;
                     EnemyBehavior enemy = _grabbedEnemy.GetComponent<EnemyBehavior>();
-                    // Check if invencible enemy is enabled
 
-                    if ((enemy != null) && (!enemy._isTransformed))
+                    if (enemy != null)
                     {
-                        enemy.DisableHabilities(_muzzle.transform, _grabPoint);
+                        // Check if enemy is transformed
+                        if (!enemy.DisableHabilities(_muzzle.transform, _grabPoint)) 
+                        {
+                            _grabbedEnemy = null;
+                            enemy = null;
+                        }
                     }
                 }
             }
@@ -230,7 +260,7 @@ public class PlayerController : MonoBehaviour
     private void MovePlayer()
     {
         _movementInput = _move.ReadValue<Vector2>();
-        _speed = _isMakingDash ? ManageDashSpeed() : ManageRunSpeed();
+        _speed = _isDashing ? ManageDashSpeed() : ManageRunSpeed();
         GetComponent<Rigidbody2D>().velocity = _movementInput.normalized * _speed;
     }
     private float ManageRunSpeed()
@@ -254,16 +284,42 @@ public class PlayerController : MonoBehaviour
 
     private void StartDash()
     {
-        _isMakingDash = true;
+        _isDashing = true;
         transform.Translate(_movementInput.normalized * maxDashSpeed * Time.deltaTime, Space.World);
     }
     private void StopDash()
     {
-        _isMakingDash = false;
+        _isDashing = false;
         _dashingTimeElapsed = 0;
     }
     public float GetBulletSpeed()
     {
         return maxBulletSpeed;
+    }
+
+    public void SetDamage(float damage)
+    {
+        if (!_isDashing)
+        {
+            _health -= damage;
+            if (_health <= 0f)
+            {
+                _health = 0f;
+                _isDying = true;
+            }
+        }
+
+    }
+
+    private void DeathCycle()
+    {
+        GetComponent<Rigidbody2D>().isKinematic = true;
+        OnDisable();
+
+        _dieTimeElapsed += Time.deltaTime;
+        if (_dieTimeElapsed > _maxDieTime)
+        {
+            SceneManager.LoadScene("Level1");
+        }
     }
 }
