@@ -9,10 +9,11 @@ public class EnemyData : ScriptableObject
     public float maxRotationSlerp;
     public float maxTimeThrowing;
     public float maxSpeedThrowing;
-    public float maxHealth;
     public float maxTimeToTransform;
-    public float damage;
+    public float damageSet;
+    public float damageGet;
     public GameObject deathParticle;
     public GameObject teleportParticle;
     public GameObject spawnParticle;
+    public GameObject transformParticle;
 }

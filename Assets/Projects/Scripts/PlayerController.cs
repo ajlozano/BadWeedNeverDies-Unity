@@ -37,7 +37,6 @@ public class PlayerController : MonoBehaviour
     private bool _isGrabbing = false;
     private bool _isDying = false   ;
     private int _layerMask;  //User layer 2
-    [SerializeField]
     private float _health = 100;
 
     // Time
@@ -56,7 +55,7 @@ public class PlayerController : MonoBehaviour
     GameObject _weapon;
     GameObject _body;
     GameObject _grabAimParticle;
-    GameObject _grabEnemyParticle;
+    GameObject _hitEffect;
 
     Transform _muzzle;
     Animator _anim;
@@ -134,10 +133,10 @@ public class PlayerController : MonoBehaviour
         _muzzle.gameObject.SetActive(false);
         _grabPoint = _weapon.transform.Find("Crosshair").gameObject;
         _anim = this.transform.Find("Body").GetComponent<Animator>();
-
         _grabAimParticle = _weapon.transform.Find("GrabParticle").gameObject;
-        _grabAimParticle.SetActive(false);
-        EnableAltars(true);
+        if (_grabAimParticle != null)   _grabAimParticle.SetActive(false);
+        _hitEffect = this.transform.Find("HitEffect").gameObject;
+        if (_hitEffect != null) _hitEffect.SetActive(false);
         //_grabEnemyParticle = this.transform.Find("ElectricGrab").gameObject;
         // I don't know why, move 1 more bit to left is needed for correct layer mask.
         _layerMask = LayerMask.NameToLayer("Ignore Raycast") << 1;
@@ -169,19 +168,20 @@ public class PlayerController : MonoBehaviour
         {
             DeathCycle();
         }
+
     }
     private void ManageAnimation()
     {
         if (_anim != null)
         {
             _anim.SetBool("isWalking", _move.IsPressed());
-            _anim.SetBool("isDashing", false);
+            _anim.SetBool("isDashing", _isDashing);
+
+            if (_isDying)
+                _anim.SetBool("isDying", true);
         }
-
-        if (_isDying)
-            _anim.SetBool("isDying", true);
-
     }
+
     private void ManageEnemyGrab()
     {
         Debug.DrawRay(_grabPoint.transform.position, _muzzle.transform.right * grabLength, Color.red);
@@ -239,17 +239,6 @@ public class PlayerController : MonoBehaviour
                     _grabbedEnemy = null;
                 }
             }
-        }
-    }
-
-    public void EnableAltars(bool v)
-    {
-        GameObject[] altars = GameObject.FindGameObjectsWithTag("Altar");
-        foreach (var altar in altars)
-        {
-            GameObject teleport = altar.transform.Find("Teleport").gameObject;
-            if (teleport != null)
-                teleport.SetActive(v);
         }
     }
 
@@ -327,6 +316,11 @@ public class PlayerController : MonoBehaviour
     {
         if (!_isDashing)
         {
+            _anim.SetBool("isHit", true);
+            _hitEffect.SetActive(true);
+            Invoke("ClearHitEffect", 0.5f);
+            Invoke("ClearHitAnimationID", 0.1f);
+
             _health -= damage;
             if (_health <= 0f)
             {
@@ -334,7 +328,15 @@ public class PlayerController : MonoBehaviour
                 _isDying = true;
             }
         }
+    }
 
+    void ClearHitEffect()
+    {
+        _hitEffect.SetActive(false);
+    }
+    void ClearHitAnimationID()
+    {
+        _anim.SetBool("isHit", false);
     }
     private void DeathCycle()
     {

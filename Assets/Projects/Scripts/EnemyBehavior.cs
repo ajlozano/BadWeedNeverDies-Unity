@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEngine.GraphicsBuffer;
 
 public class EnemyBehavior : MonoBehaviour
 {
@@ -17,42 +18,32 @@ public class EnemyBehavior : MonoBehaviour
     private bool _isGrabbed = false;
     private bool _isThrowing = false;
     [SerializeField]
-    private float _health;
+    private float _health = 100f;
     //Time
     public float _destroyTimeElapsed = 0;
     public float _maxDestroyTime = 1f;
     private float _throwingTimeElapsed = 0;
     [SerializeField]
     private float _timeToTransformElapsed = 0;
+    [SerializeField]
+    private float _timeToHitElapsed = 0;
+    private float _maxTimeToHit = 1f;
     // objects
     private GameObject _player;
     private GameObject _body;
     private Animator _anim;
     private GameObject _grabAimParticle;
-    private GameObject _destroyParticle;
 
     private void Awake()
     {
-        //if (enemyData.teleportParticle != null)
-        //{
-        //    GameObject particle = Instantiate(enemyData.spawnParticle, transform.position, transform.rotation);
-        //    particle.transform.localScale = new Vector3(1, 1, 1);
-        //    Destroy(particle, 1f);
-        //}
-
         _player = GameObject.Find("Player");
         _body = this.transform.Find("Body").gameObject;
         _anim = _body.GetComponent<Animator>();
-        _health = enemyData.maxHealth;
 
         _grabAimParticle = this.transform.Find("PurpleGrab").gameObject;
         _grabAimParticle.SetActive(false);
-        //enemyData.deathParticle.SetActive(false);
 
-    }
-    // Start is called before the first frame update
-    void Start()
-    {
+        _health = 100f;
 
     }
 
@@ -66,7 +57,7 @@ public class EnemyBehavior : MonoBehaviour
             {
                 if (!_isDying)
                 {
-                    _isTransformed = true;
+                    TransformBehaviour();
                 }
             }
         }
@@ -86,7 +77,16 @@ public class EnemyBehavior : MonoBehaviour
             _throwingTimeElapsed += Time.deltaTime;
             ThrowItself();
         }
+    }
 
+    private void TransformBehaviour()
+    {
+        _isTransformed = true;
+        GameObject particle = Instantiate(enemyData.transformParticle, transform.position, transform.rotation);
+        particle.transform.SetParent(this.transform);
+        particle.transform.localScale = Vector3.one / 1.5f;
+        particle.transform.localPosition = new Vector3(0, 0.5f,0);
+        _body.GetComponent<SpriteRenderer>().color = Color.red;
     }
 
     private void DeathCycle()
@@ -130,6 +130,20 @@ public class EnemyBehavior : MonoBehaviour
             _anim.SetBool(id, result);
         }
     }
+    private bool GetAnimationId(String id)
+    {
+        if (_anim != null)
+        {
+           return _anim.GetBool(id);
+        }
+
+        return false;
+    }
+    bool AnimatorIsPlaying(string stateName)
+    {
+        return _anim.GetCurrentAnimatorStateInfo(0).IsName(stateName);
+    }
+
     private void MoveEnemy()
     {
         Vector2 relativePos = _player.transform.position - transform.position;
@@ -182,38 +196,26 @@ public class EnemyBehavior : MonoBehaviour
         _isGrabbed = false;
         _isThrowing = true;
     }
-    public void SetDamage(float damage)
+    public void SetDamage()
     {
         if (!_isTransformed)
         {
-            _health -= damage;
             SetAnimationId("isHit", true);
+            Invoke("ClearHitAnimationID", 0.1f);
 
+            _health -= enemyData.damageGet;
             if (_health <= 0.0f)
             {
                 _health = 0.0f;
                 _isDying = true;
             }
         }
-
     }
-    private void OnCollisionEnter2D(Collision2D collision)
+
+    void ClearHitAnimationID()
     {
-        //GameObject target = collision.gameObject;
-
-        //if (_isThrowing && target.tag != "Player")
-        //{
-        //    transform.rotation = Quaternion.identity;
-        //    _isGrabbed = false;
-        //    _isThrowing = false;
-        //    _throwingTimeElapsed = 0;
-        //}
-        //else if (!_isThrowing && target.tag == "Player")
-        //{
-        //    target.GetComponent<PlayerController>().SetDamage(enemyData.damage);
-        //}
+        SetAnimationId("isHit", false);
     }
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
         GameObject target = collision.gameObject;
@@ -240,9 +242,30 @@ public class EnemyBehavior : MonoBehaviour
         }
         else if (!_isThrowing && target.tag == "Player")
         {
-            target.GetComponent<PlayerController>().SetDamage(enemyData.damage);
+            target.GetComponent<PlayerController>().SetDamage(enemyData.damageSet);
+            _timeToHitElapsed = 0f;
         }
     }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (!_isThrowing && collision.transform.tag == "Player")
+        {
+            _timeToHitElapsed += Time.deltaTime;
+            if (_timeToHitElapsed >= _maxTimeToHit)
+            {
+                collision.transform.GetComponent<PlayerController>().SetDamage(enemyData.damageSet);
+                _timeToHitElapsed = 0f;
+            }
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (!_isThrowing && collision.transform.tag == "Player")
+            _timeToHitElapsed = 0f;
+    }
+
 
 
 }

@@ -5,17 +5,18 @@ using UnityEngine;
 public class GameManagement : MonoBehaviour
 {
 
+    [Header("Game Properties")]
+    public int _maxEnemiesInScene = 4;
+    public float _maxTimeToSpawn = 5;
+    [Header("Objects")]
     public GameObject enemy;
     public GameObject particle;
-
     private GameObject _player;
 
-    private float _timeToSpawnElapsed = 0;
     private float _timeToNextSpawn = 0;
-    private float _maxTimeToSpawn = 5;
     private bool _isSpawning = true;
     private Vector3 _spawnPos;
-    private int _maxEnemiesInScene = 4;
+
 
     // Start is called before the first frame update
     void Start()

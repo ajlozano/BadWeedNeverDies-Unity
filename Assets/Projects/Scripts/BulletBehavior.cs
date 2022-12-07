@@ -9,9 +9,6 @@ public class BulletBehavior : MonoBehaviour
     public GameObject impactEffect;
     public GameObject targetExplosionEffect;
 
-    [Header("Bullet properties")]
-    public float damage;
-
     [SerializeField]
     private float _bulletSpeed = 10;
 
@@ -38,7 +35,7 @@ public class BulletBehavior : MonoBehaviour
             Destroy(_impactObjectSpawned, 1.0f);
             if (collision.gameObject.tag == "Enemy")
             {
-                collision.gameObject.GetComponent<EnemyBehavior>().SetDamage(damage);
+                collision.gameObject.GetComponent<EnemyBehavior>().SetDamage();
             }
 
             Destroy(this.gameObject);

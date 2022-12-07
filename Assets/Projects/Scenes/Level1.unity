@@ -152,7 +152,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &117170589
 GameObject:
@@ -1289,7 +1289,7 @@ PrefabInstance:
     - target: {fileID: 4128705096430331519, guid: 8ffdc0c1d02b9614a8a85849af17a79f,
         type: 3}
       propertyPath: m_RootOrder
-      value: 4
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4128705096430331519, guid: 8ffdc0c1d02b9614a8a85849af17a79f,
         type: 3}
@@ -11203,6 +11203,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff20eff41ee56e64891485f775ad9528, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _maxEnemiesInScene: 8
+  _maxTimeToSpawn: 5
   enemy: {fileID: 3065187114439300977, guid: 421f21dc3ead7e1469d430f14e1785bc, type: 3}
   particle: {fileID: 7226888052703040409, guid: c2e6b40d11326eb4c98f085fccf9153b,
     type: 3}
