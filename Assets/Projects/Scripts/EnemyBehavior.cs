@@ -8,10 +8,11 @@ using static UnityEngine.GraphicsBuffer;
 
 public class EnemyBehavior : MonoBehaviour
 {
-    // edit in inspector
+    //Edit in inspector
     [Header("Enemy properties")]
     public EnemyData enemyData;
-    // Enemy
+
+    //Enemy
     private bool _isDying;
     [SerializeField]
     private bool _isTransformed = false;
@@ -19,6 +20,7 @@ public class EnemyBehavior : MonoBehaviour
     private bool _isThrowing = false;
     [SerializeField]
     private float _health = 100f;
+
     //Time
     public float _destroyTimeElapsed = 0;
     public float _maxDestroyTime = 1f;
@@ -28,6 +30,7 @@ public class EnemyBehavior : MonoBehaviour
     [SerializeField]
     private float _timeToHitElapsed = 0;
     private float _maxTimeToHit = 1f;
+
     // objects
     private GameObject _player;
     private GameObject _body;
@@ -47,7 +50,8 @@ public class EnemyBehavior : MonoBehaviour
 
     }
 
-    // Update is called once per frame
+    #region main
+
     void Update()
     {
         if (!_isTransformed)

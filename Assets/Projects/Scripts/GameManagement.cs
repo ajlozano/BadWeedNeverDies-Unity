@@ -33,7 +33,7 @@ public class GameManagement : MonoBehaviour
             Invoke("SpawnParticle", _timeToNextSpawn);
             _isSpawning = true;
         }
-    }
+    }   
 
     void SpawnParticle()
     {
