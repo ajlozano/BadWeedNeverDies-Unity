@@ -8,24 +8,16 @@ public class BulletBehavior : MonoBehaviour
     [Header("Effect objects to inlcude")]
     public GameObject impactEffect;
     public GameObject targetExplosionEffect;
-
-    [SerializeField]
     private float _bulletSpeed = 10;
-
     private GameObject _impactObjectSpawned;
-    private GameObject _explosionObjectSpawned;
-    // Start is called before the first frame update
+
     void Start()
     {
         PlayerController playerController = GameObject.Find("Player").GetComponent<PlayerController>();
         _bulletSpeed = playerController.GetBulletSpeed();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        transform.Translate(Vector3.right * _bulletSpeed * Time.deltaTime);
-    }
+    private void FixedUpdate() => transform.Translate(Vector3.right * _bulletSpeed * Time.deltaTime);
 
     private void OnTriggerEnter2D(Collider2D collision)
     {

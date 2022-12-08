@@ -14,20 +14,16 @@ public class EnemyBehavior : MonoBehaviour
 
     //Enemy
     private bool _isDying;
-    [SerializeField]
     private bool _isTransformed = false;
     private bool _isGrabbed = false;
     private bool _isThrowing = false;
-    [SerializeField]
     private float _health = 100f;
 
-    //Time
+    //Delta time
     public float _destroyTimeElapsed = 0;
     public float _maxDestroyTime = 1f;
     private float _throwingTimeElapsed = 0;
-    [SerializeField]
     private float _timeToTransformElapsed = 0;
-    [SerializeField]
     private float _timeToHitElapsed = 0;
     private float _maxTimeToHit = 1f;
 
@@ -42,21 +38,34 @@ public class EnemyBehavior : MonoBehaviour
         _player = GameObject.Find("Player");
         _body = this.transform.Find("Body").gameObject;
         _anim = _body.GetComponent<Animator>();
-
         _grabAimParticle = this.transform.Find("PurpleGrab").gameObject;
         _grabAimParticle.SetActive(false);
-
-        _health = 100f;
-
     }
 
+    private void Start()
+    {
+        _health = 100f;
+    }
     #region main
+    #endregion
 
     void Update()
     {
         if (!_isTransformed)
         {
             _timeToTransformElapsed += Time.deltaTime;
+        }
+
+        if (_isThrowing)
+        {
+            _throwingTimeElapsed += Time.deltaTime;
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (!_isTransformed)
+        {
             if (_timeToTransformElapsed >= enemyData.maxTimeToTransform)
             {
                 if (!_isDying)
@@ -65,6 +74,7 @@ public class EnemyBehavior : MonoBehaviour
                 }
             }
         }
+
         if ((!_isGrabbed) && (!_isThrowing))
         {
             if ((_player != null) && (!_isDying))
@@ -78,7 +88,6 @@ public class EnemyBehavior : MonoBehaviour
         }
         if (_isThrowing)
         {
-            _throwingTimeElapsed += Time.deltaTime;
             ThrowItself();
         }
     }
@@ -89,7 +98,7 @@ public class EnemyBehavior : MonoBehaviour
         GameObject particle = Instantiate(enemyData.transformParticle, transform.position, transform.rotation);
         particle.transform.SetParent(this.transform);
         particle.transform.localScale = Vector3.one / 1.5f;
-        particle.transform.localPosition = new Vector3(0, 0.5f,0);
+        particle.transform.localPosition = new Vector3(0, 0.5f, 0);
         _body.GetComponent<SpriteRenderer>().color = Color.red;
     }
 
@@ -98,7 +107,7 @@ public class EnemyBehavior : MonoBehaviour
         _grabAimParticle.SetActive(false);
 
         GetComponent<Rigidbody2D>().isKinematic = true;
-        transform.GetComponent<Rigidbody2D>().velocity = new Vector2(0,0);
+        transform.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
 
         _destroyTimeElapsed += Time.deltaTime;
         if (_destroyTimeElapsed >= _maxDestroyTime)
@@ -134,18 +143,9 @@ public class EnemyBehavior : MonoBehaviour
             _anim.SetBool(id, result);
         }
     }
-    private bool GetAnimationId(String id)
+    void ClearHitAnimationID()
     {
-        if (_anim != null)
-        {
-           return _anim.GetBool(id);
-        }
-
-        return false;
-    }
-    bool AnimatorIsPlaying(string stateName)
-    {
-        return _anim.GetCurrentAnimatorStateInfo(0).IsName(stateName);
+        SetAnimationId("isHit", false);
     }
 
     private void MoveEnemy()
@@ -172,7 +172,6 @@ public class EnemyBehavior : MonoBehaviour
         }
         else
         {
-            //transform.Translate(Vector2.right * enemyData.maxSpeedThrowing * Time.deltaTime);
             GetComponent<Rigidbody2D>().velocity = this.transform.right * enemyData.maxSpeedThrowing;
         }
     }
@@ -214,11 +213,6 @@ public class EnemyBehavior : MonoBehaviour
                 _isDying = true;
             }
         }
-    }
-
-    void ClearHitAnimationID()
-    {
-        SetAnimationId("isHit", false);
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -269,7 +263,4 @@ public class EnemyBehavior : MonoBehaviour
         if (!_isThrowing && collision.transform.tag == "Player")
             _timeToHitElapsed = 0f;
     }
-
-
-
 }

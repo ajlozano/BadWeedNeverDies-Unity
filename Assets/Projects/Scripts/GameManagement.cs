@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class GameManagement : MonoBehaviour
 {
-
     [Header("Game Properties")]
     public int _maxEnemiesInScene = 4;
     public float _maxTimeToSpawn = 5;
@@ -17,12 +16,15 @@ public class GameManagement : MonoBehaviour
     private bool _isSpawning = true;
     private Vector3 _spawnPos;
 
+    private void Awake()
+    {
+        _player = GameObject.Find("Player");
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         Invoke("SpawnParticle", 2f);
-        _player = GameObject.Find("Player");
     }
 
     // Update is called once per frame

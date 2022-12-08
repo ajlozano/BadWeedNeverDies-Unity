@@ -33,13 +33,14 @@ public class PlayerController : MonoBehaviour
     // player
     private float _speed = 0.0f;
     private Vector2 _movementInput = Vector2.zero;
+    private Vector2 _aimInput = Vector2.zero;
     private bool _isDashing = false;
     private bool _isGrabbing = false;
     private bool _isDying = false   ;
     private int _layerMask;  //User layer 2
     private float _health = 100;
 
-    // Time
+    // delta time
     private float _timeElapsed = 0;
     private float _dashingTimeElapsed = 0;
     private float _muzzleCountdown = 0;
@@ -68,7 +69,15 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         _playerControls = new PlayerInputActions();
-
+        _cam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+        _weapon = this.transform.Find("Weapon").gameObject;
+        _body = this.transform.Find("Body").gameObject;
+        _muzzle = _weapon.transform.Find("Muzzle");
+        _muzzle.gameObject.SetActive(false);
+        _grabPoint = _weapon.transform.Find("Crosshair").gameObject;
+        _anim = this.transform.Find("Body").GetComponent<Animator>();
+        _grabAimParticle = _weapon.transform.Find("GrabParticle").gameObject;
+        _hitEffect = this.transform.Find("HitEffect").gameObject;
     }
     private void OnEnable()
     {
@@ -84,11 +93,8 @@ public class PlayerController : MonoBehaviour
         _dash.Enable();
         _grab.Enable();
 
-        _move.performed += Move;
-        _aim.performed += Aim;
         _fire.performed += Fire;
         _dash.performed += Dash;
-        _grab.performed += Grab;
     }
     private void OnDisable()
     {
@@ -96,14 +102,6 @@ public class PlayerController : MonoBehaviour
         _fire.Disable();
         _dash.Disable();
         _grab.Disable();
-    }
-    private void Aim(InputAction.CallbackContext obj) {}
-    private void Move(InputAction.CallbackContext obj) {}
-    private void Grab(InputAction.CallbackContext obj) 
-    {
-
-        // TODO: asignar correectamente las partículas
-
     }
     private void Fire(InputAction.CallbackContext obj)
     {
@@ -126,16 +124,7 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _cam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
-        _weapon = this.transform.Find("Weapon").gameObject;
-        _body = this.transform.Find("Body").gameObject;
-        _muzzle = _weapon.transform.Find("Muzzle");
-        _muzzle.gameObject.SetActive(false);
-        _grabPoint = _weapon.transform.Find("Crosshair").gameObject;
-        _anim = this.transform.Find("Body").GetComponent<Animator>();
-        _grabAimParticle = _weapon.transform.Find("GrabParticle").gameObject;
         if (_grabAimParticle != null)   _grabAimParticle.SetActive(false);
-        _hitEffect = this.transform.Find("HitEffect").gameObject;
         if (_hitEffect != null) _hitEffect.SetActive(false);
         //_grabEnemyParticle = this.transform.Find("ElectricGrab").gameObject;
         // I don't know why, move 1 more bit to left is needed for correct layer mask.
@@ -147,13 +136,18 @@ public class PlayerController : MonoBehaviour
     {
         // Only main player actions placed directly on Update()
         // Other actions must be placed as a coroutine.
-        MovePlayer();
-        RotatePlayer();     
-        ManageEnemyGrab();
-        ManageAnimation();
+        _movementInput = _move.ReadValue<Vector2>();
+        _aimInput = _aim.ReadValue<Vector2>();
+        _isGrabbing = _grab.IsPressed();
+
     }
     private void FixedUpdate()
     {
+        MovePlayer();
+        RotatePlayer();
+        ManageEnemyGrab();
+        ManageAnimation();
+
         if (_muzzleCountdown > 0)
         {
             _muzzleCountdown -= Time.deltaTime;
@@ -168,7 +162,6 @@ public class PlayerController : MonoBehaviour
         {
             DeathCycle();
         }
-
     }
     private void ManageAnimation()
     {
@@ -181,11 +174,9 @@ public class PlayerController : MonoBehaviour
                 _anim.SetBool("isDying", true);
         }
     }
-
     private void ManageEnemyGrab()
     {
         Debug.DrawRay(_grabPoint.transform.position, _muzzle.transform.right * grabLength, Color.red);
-        _isGrabbing = _grab.IsPressed();
 
         if (_isGrabbing)
         {
@@ -193,7 +184,6 @@ public class PlayerController : MonoBehaviour
             {
                 _grabAimParticle.SetActive(true);
             }
-
             if (_grabbedEnemy == null)
             {
                 // Raycast config
@@ -241,11 +231,15 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-
+    private void MovePlayer()
+    {
+        _speed = _isDashing ? ManageDashSpeed() : ManageRunSpeed();
+        GetComponent<Rigidbody2D>().velocity = _movementInput.normalized * _speed;
+    }
     private void RotatePlayer()
     {
         /*** for mouse cursor rotation ***/
-        Vector3 position = _cam.ScreenToWorldPoint(new Vector3(_aim.ReadValue<Vector2>().x, _aim.ReadValue<Vector2>().y, 0.0f));
+        Vector3 position = _cam.ScreenToWorldPoint(new Vector3(_aimInput.x, _aimInput.y, 0.0f));
         Vector3 aimingEuler = new Vector3(0, 0, Mathf.Atan2(position.y - transform.position.y,
              position.x - transform.position.x) * Mathf.Rad2Deg);
 
@@ -258,26 +252,16 @@ public class PlayerController : MonoBehaviour
         {
             _weapon.transform.eulerAngles = new Vector3(0, 180, 180 - aimingEuler.z);
             _body.transform.eulerAngles = new Vector3(0, 180f, 0);
-            //_body.GetComponent<SpriteRenderer>().flipX = true;
-            print(_body.transform.eulerAngles);
             _weapon.transform.Find("Shotgun").GetComponent<SpriteRenderer>().sortingOrder = 1;
         }
         else
         {
             _weapon.transform.eulerAngles = aimingEuler;
             _body.transform.eulerAngles = new Vector3(0, 0, 0);
-            //_body.GetComponent<SpriteRenderer>().flipX = false;
-
-            print(_body.transform.eulerAngles);
             _weapon.transform.Find("Shotgun").GetComponent<SpriteRenderer>().sortingOrder = 2;
         }
     }
-    private void MovePlayer()
-    {
-        _movementInput = _move.ReadValue<Vector2>();
-        _speed = _isDashing ? ManageDashSpeed() : ManageRunSpeed();
-        GetComponent<Rigidbody2D>().velocity = _movementInput.normalized * _speed;
-    }
+
     private float ManageRunSpeed()
     {
         if (_movementInput.normalized.magnitude > 0.1f)
@@ -286,7 +270,6 @@ public class PlayerController : MonoBehaviour
             if (_timeElapsed > lerpTime) _timeElapsed = lerpTime;
         }
         else _timeElapsed = 0;
-
         return Mathf.Lerp(0.0f, maxSpeed,_timeElapsed / lerpTime);
     }
     private float ManageDashSpeed()
