@@ -1,25 +1,18 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEngine.GraphicsBuffer;
-
 public class EnemyBehavior : MonoBehaviour
 {
-    //Edit in inspector
+    // Edit in inspector
     [Header("Enemy properties")]
     public EnemyData enemyData;
 
-    //Enemy
+    // Enemy
     private bool _isDying;
     private bool _isTransformed = false;
     private bool _isGrabbed = false;
     private bool _isThrowing = false;
-    private float _health = 100f;
 
-    //Delta time
+    // Delta time
     public float _destroyTimeElapsed = 0;
     public float _maxDestroyTime = 1f;
     private float _throwingTimeElapsed = 0;
@@ -27,11 +20,12 @@ public class EnemyBehavior : MonoBehaviour
     private float _timeToHitElapsed = 0;
     private float _maxTimeToHit = 1f;
 
-    // objects
+    // Objects
     private GameObject _player;
     private GameObject _body;
     private Animator _anim;
     private GameObject _grabAimParticle;
+    private HealthManager _healthManager;
 
     private void Awake()
     {
@@ -40,15 +34,8 @@ public class EnemyBehavior : MonoBehaviour
         _anim = _body.GetComponent<Animator>();
         _grabAimParticle = this.transform.Find("PurpleGrab").gameObject;
         _grabAimParticle.SetActive(false);
+        _healthManager = this.GetComponent<HealthManager>();
     }
-
-    private void Start()
-    {
-        _health = 100f;
-    }
-    #region main
-    #endregion
-
     void Update()
     {
         if (!_isTransformed)
@@ -61,7 +48,6 @@ public class EnemyBehavior : MonoBehaviour
             _throwingTimeElapsed += Time.deltaTime;
         }
     }
-
     private void FixedUpdate()
     {
         if (!_isTransformed)
@@ -143,7 +129,7 @@ public class EnemyBehavior : MonoBehaviour
             _anim.SetBool(id, result);
         }
     }
-    void ClearHitAnimationID()
+    private void ClearHitAnimationID()
     {
         SetAnimationId("isHit", false);
     }
@@ -206,12 +192,7 @@ public class EnemyBehavior : MonoBehaviour
             SetAnimationId("isHit", true);
             Invoke("ClearHitAnimationID", 0.1f);
 
-            _health -= enemyData.damageGet;
-            if (_health <= 0.0f)
-            {
-                _health = 0.0f;
-                _isDying = true;
-            }
+            _isDying = _healthManager.SetDamage(enemyData.damageGet);
         }
     }
     private void OnTriggerEnter2D(Collider2D collision)

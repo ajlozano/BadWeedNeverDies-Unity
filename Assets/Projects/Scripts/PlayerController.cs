@@ -1,36 +1,29 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class PlayerController : MonoBehaviour
 {
     private const float MAX_MUZZLE_TIME = 0.1f;
 
-    // edit on Inspector
+    // Edit on Inspector
     [Header("Running properties")]
     public float maxSpeed;
     public float lerpTime;
-
+    [Space(10)]
     [Header("Grab properties")]
     public float grabLength = 5f;
-    public Vector2 enemyThrowForce = new Vector2(5f, 0f); 
-
+    public Vector2 enemyThrowForce = new Vector2(5f, 0f);
+    [Space(10)]
     [Header("Dash properties")]
     public float maxDashTime;
     public float maxDashSpeed;
-
+    [Space(10)]
     [Header("Bullet properties")]
     public GameObject _bullet;
     public float maxBulletSpeed;
 
-    // player
+    // Player
     private float _speed = 0.0f;
     private Vector2 _movementInput = Vector2.zero;
     private Vector2 _aimInput = Vector2.zero;
@@ -38,16 +31,15 @@ public class PlayerController : MonoBehaviour
     private bool _isGrabbing = false;
     private bool _isDying = false   ;
     private int _layerMask;  //User layer 2
-    private float _health = 100;
 
-    // delta time
+    // Delta time
     private float _timeElapsed = 0;
     private float _dashingTimeElapsed = 0;
     private float _muzzleCountdown = 0;
     private float _dieTimeElapsed = 0;
     private float _maxDieTime = 1f;
 
-    // objects
+    // Objects
     //Gamepad gamepad;
     GameObject _grabbedEnemy;
     Camera _cam;
@@ -65,7 +57,8 @@ public class PlayerController : MonoBehaviour
     InputAction _fire;
     InputAction _dash;
     InputAction _grab;
-
+    HealthManager _healthManager;
+    AnimationManager _animManager;
     private void Awake()
     {
         _playerControls = new PlayerInputActions();
@@ -75,9 +68,10 @@ public class PlayerController : MonoBehaviour
         _muzzle = _weapon.transform.Find("Muzzle");
         _muzzle.gameObject.SetActive(false);
         _grabPoint = _weapon.transform.Find("Crosshair").gameObject;
-        _anim = this.transform.Find("Body").GetComponent<Animator>();
+        _animManager = this.GetComponent<AnimationManager>();
         _grabAimParticle = _weapon.transform.Find("GrabParticle").gameObject;
         _hitEffect = this.transform.Find("HitEffect").gameObject;
+        _healthManager = this.GetComponent<HealthManager>();
     }
     private void OnEnable()
     {
@@ -130,6 +124,8 @@ public class PlayerController : MonoBehaviour
         // I don't know why, move 1 more bit to left is needed for correct layer mask.
         _layerMask = LayerMask.NameToLayer("Ignore Raycast") << 1;
         _layerMask = ~_layerMask;
+
+
     }
     // Update is called once per frame
     void Update()
@@ -146,7 +142,14 @@ public class PlayerController : MonoBehaviour
         MovePlayer();
         RotatePlayer();
         ManageEnemyGrab();
-        ManageAnimation();
+        if (_animManager != null)
+        {
+            _animManager.SetAnimationId("isWalking", _move.IsPressed());
+            _animManager.SetAnimationId("isDashing", _isDashing);
+            if (_isDying)
+                _animManager.SetAnimationId("isDying", true);
+        }
+        
 
         if (_muzzleCountdown > 0)
         {
@@ -161,17 +164,6 @@ public class PlayerController : MonoBehaviour
         if (_isDying)
         {
             DeathCycle();
-        }
-    }
-    private void ManageAnimation()
-    {
-        if (_anim != null)
-        {
-            _anim.SetBool("isWalking", _move.IsPressed());
-            _anim.SetBool("isDashing", _isDashing);
-
-            if (_isDying)
-                _anim.SetBool("isDying", true);
         }
     }
     private void ManageEnemyGrab()
@@ -218,8 +210,6 @@ public class PlayerController : MonoBehaviour
             {
                 _grabAimParticle.SetActive(false);
             }
-
-
             if (_grabbedEnemy != null)
             {
                 EnemyBehavior enemy = _grabbedEnemy.GetComponent<EnemyBehavior>();
@@ -299,17 +289,10 @@ public class PlayerController : MonoBehaviour
     {
         if (!_isDashing)
         {
-            _anim.SetBool("isHit", true);
+            _animManager.SetAnimationId("isHit", true, 0.1f);
             _hitEffect.SetActive(true);
             Invoke("ClearHitEffect", 0.5f);
-            Invoke("ClearHitAnimationID", 0.1f);
-
-            _health -= damage;
-            if (_health <= 0f)
-            {
-                _health = 0f;
-                _isDying = true;
-            }
+            _isDying = _healthManager.SetDamage(damage);
         }
     }
 
@@ -317,10 +300,10 @@ public class PlayerController : MonoBehaviour
     {
         _hitEffect.SetActive(false);
     }
-    void ClearHitAnimationID()
-    {
-        _anim.SetBool("isHit", false);
-    }
+    //void ClearHitAnimationID()
+    //{
+    //    _anim.SetBool("isHit", false);
+    //}
     private void DeathCycle()
     {
         GetComponent<Rigidbody2D>().isKinematic = true;

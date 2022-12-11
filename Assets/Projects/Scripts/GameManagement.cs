@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManagement : MonoBehaviour
 {
+    // Edit in inspector
     [Header("Game Properties")]
     public int _maxEnemiesInScene = 4;
     public float _maxTimeToSpawn = 5;
@@ -12,9 +14,12 @@ public class GameManagement : MonoBehaviour
     public GameObject particle;
     private GameObject _player;
 
+    // Delta time
     private float _timeToNextSpawn = 0;
+
     private bool _isSpawning = true;
     private Vector3 _spawnPos;
+    
 
     private void Awake()
     {
@@ -27,15 +32,14 @@ public class GameManagement : MonoBehaviour
         Invoke("SpawnParticle", 2f);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void FixedUpdate()
     {
         if (!_isSpawning)
         {
             Invoke("SpawnParticle", _timeToNextSpawn);
             _isSpawning = true;
         }
-    }   
+    }
 
     void SpawnParticle()
     {

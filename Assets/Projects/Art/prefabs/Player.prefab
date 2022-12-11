@@ -1,36 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &680732227917805347
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2481497890291048611}
-  m_Layer: 2
-  m_Name: GrabPoint
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2481497890291048611
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 680732227917805347}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.52, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 4128705096430331519}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1273305100221063482
 GameObject:
   m_ObjectHideFlags: 0
@@ -64,7 +33,7 @@ Transform:
   - {fileID: 6381805788550230763}
   - {fileID: 1652143757730437532}
   m_Father: {fileID: 4128705096430331519}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2506745914980208037
 GameObject:
@@ -268,6 +237,7 @@ GameObject:
   - component: {fileID: 8295568394740988440}
   - component: {fileID: 296212925926712306}
   - component: {fileID: 7678993882824384224}
+  - component: {fileID: 908462284}
   m_Layer: 2
   m_Name: Player
   m_TagString: Player
@@ -289,7 +259,6 @@ Transform:
   m_Children:
   - {fileID: 6506843266681189736}
   - {fileID: 5858361244128940076}
-  - {fileID: 2481497890291048611}
   - {fileID: 3749760798255592374}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -392,6 +361,19 @@ MonoBehaviour:
   maxDashSpeed: 30
   _bullet: {fileID: 5986328680246833833, guid: 6bf8d2d94d225bd4585b1ced17035c3a, type: 3}
   maxBulletSpeed: 50
+--- !u!114 &908462284
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4968344347348043695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c83a49834d7565b4f8df3876d2f439d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  healthBar: {fileID: 0}
 --- !u!1 &9083987162760112819
 GameObject:
   m_ObjectHideFlags: 0

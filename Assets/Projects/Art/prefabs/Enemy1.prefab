@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3065187114439300979}
   - component: {fileID: 3065187114439300978}
   - component: {fileID: 3065187114439300981}
+  - component: {fileID: 7740966371589817688}
   m_Layer: 3
   m_Name: Enemy1
   m_TagString: Enemy
@@ -98,12 +99,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyData: {fileID: 11400000, guid: 16ce4e2fdda6d5e43a80c9d0ebedee5a, type: 2}
-  _isTransformed: 0
-  _health: 0
   _destroyTimeElapsed: 0
   _maxDestroyTime: 1
-  _timeToTransformElapsed: 0
-  _timeToHitElapsed: 0
+--- !u!114 &7740966371589817688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3065187114439300977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c83a49834d7565b4f8df3876d2f439d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  healthBar: {fileID: 0}
 --- !u!1 &3065187115329741695
 GameObject:
   m_ObjectHideFlags: 0
