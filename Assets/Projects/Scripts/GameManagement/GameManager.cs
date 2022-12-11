@@ -3,35 +3,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GameManagement : MonoBehaviour
+public class GameManager : MonoBehaviour
 {
-    // Edit in inspector
+    #region Public Properties
     [Header("Game Properties")]
     public int _maxEnemiesInScene = 4;
     public float _maxTimeToSpawn = 5;
     [Header("Objects")]
     public GameObject enemy;
     public GameObject particle;
-    private GameObject _player;
+    #endregion
 
+    #region Private Properties
+    private GameObject _player;
     // Delta time
     private float _timeToNextSpawn = 0;
-
     private bool _isSpawning = true;
     private Vector3 _spawnPos;
-    
+    #endregion
 
+    #region Main Methods
     private void Awake()
     {
         _player = GameObject.Find("Player");
     }
-
-    // Start is called before the first frame update
     void Start()
     {
         Invoke("SpawnParticle", 2f);
     }
-
     private void FixedUpdate()
     {
         if (!_isSpawning)
@@ -40,8 +39,13 @@ public class GameManagement : MonoBehaviour
             _isSpawning = true;
         }
     }
+    #endregion
 
-    void SpawnParticle()
+    #region Public Methods
+    #endregion
+
+    #region Private Methods
+    private void SpawnParticle()
     {
         GameObject[] enemiesSpawned = GameObject.FindGameObjectsWithTag("Enemy");
         if (enemiesSpawned.Length < _maxEnemiesInScene)
@@ -71,7 +75,7 @@ public class GameManagement : MonoBehaviour
             _isSpawning = false;
         }
     }
-    void SpawnEnemy()
+    private void SpawnEnemy()
     {
         if (enemy != null)
         {
@@ -81,4 +85,13 @@ public class GameManagement : MonoBehaviour
             _isSpawning = false;
         }
     }
+    #endregion
+
+
+
+
+
+
+
+
 }

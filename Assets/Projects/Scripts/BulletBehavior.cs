@@ -5,12 +5,18 @@ using UnityEngine;
 
 public class BulletBehavior : MonoBehaviour
 {
+    #region Public Properties
     [Header("Effect objects to inlcude")]
     public GameObject impactEffect;
     public GameObject targetExplosionEffect;
+    #endregion
+
+    #region Private Properties
     private float _bulletSpeed = 10;
     private GameObject _impactObjectSpawned;
+    #endregion
 
+    #region Main Methods
     void Start()
     {
         PlayerController playerController = GameObject.Find("Player").GetComponent<PlayerController>();
@@ -33,4 +39,5 @@ public class BulletBehavior : MonoBehaviour
             Destroy(this.gameObject);
         }
     }
+    #endregion
 }

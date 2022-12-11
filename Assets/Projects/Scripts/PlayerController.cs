@@ -4,8 +4,7 @@ using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
-    private const float MAX_MUZZLE_TIME = 0.1f;
-
+    #region Public Properties
     // Edit on Inspector
     [Header("Running properties")]
     public float maxSpeed;
@@ -22,21 +21,22 @@ public class PlayerController : MonoBehaviour
     [Header("Bullet properties")]
     public GameObject _bullet;
     public float maxBulletSpeed;
+    #endregion
 
+    #region Private Properties
+    private const float MAX_MUZZLE_TIME = 0.1f;
     // Player
     private float _speed = 0.0f;
     private Vector2 _movementInput = Vector2.zero;
     private Vector2 _aimInput = Vector2.zero;
     private bool _isDashing = false;
     private bool _isGrabbing = false;
-    private bool _isDying = false   ;
+    private bool _isDying = false;
     private int _layerMask;  //User layer 2
 
     // Delta time
     private float _timeElapsed = 0;
-    private float _dashingTimeElapsed = 0;
     private float _muzzleCountdown = 0;
-    private float _dieTimeElapsed = 0;
     private float _maxDieTime = 1f;
 
     // Objects
@@ -49,9 +49,7 @@ public class PlayerController : MonoBehaviour
     GameObject _body;
     GameObject _grabAimParticle;
     GameObject _hitEffect;
-
     Transform _muzzle;
-    Animator _anim;
     InputAction _move;
     InputAction _aim;
     InputAction _fire;
@@ -59,6 +57,9 @@ public class PlayerController : MonoBehaviour
     InputAction _grab;
     HealthManager _healthManager;
     AnimationManager _animManager;
+    #endregion
+
+    #region Main Methods
     private void Awake()
     {
         _playerControls = new PlayerInputActions();
@@ -97,37 +98,16 @@ public class PlayerController : MonoBehaviour
         _dash.Disable();
         _grab.Disable();
     }
-    private void Fire(InputAction.CallbackContext obj)
-    {
-        if (!_isGrabbing)
-        {
-            Instantiate(_bullet, _muzzle.position, _muzzle.transform.rotation);
-            _muzzle.gameObject.SetActive(true);
-            _muzzleCountdown = MAX_MUZZLE_TIME;
-        }
-    }
-    private void Dash(InputAction.CallbackContext obj)
-    {
-        if (!_isDashing)
-        {
-            _dashingTimeElapsed = 0;
-            if (_movementInput.magnitude > 0.1f)
-                StartDash();
-        }
-    }
-    // Start is called before the first frame update
     void Start()
     {
-        if (_grabAimParticle != null)   _grabAimParticle.SetActive(false);
+        if (_grabAimParticle != null) _grabAimParticle.SetActive(false);
         if (_hitEffect != null) _hitEffect.SetActive(false);
-        //_grabEnemyParticle = this.transform.Find("ElectricGrab").gameObject;
         // I don't know why, move 1 more bit to left is needed for correct layer mask.
         _layerMask = LayerMask.NameToLayer("Ignore Raycast") << 1;
         _layerMask = ~_layerMask;
 
 
     }
-    // Update is called once per frame
     void Update()
     {
         // Only main player actions placed directly on Update()
@@ -149,7 +129,7 @@ public class PlayerController : MonoBehaviour
             if (_isDying)
                 _animManager.SetAnimationId("isDying", true);
         }
-        
+
 
         if (_muzzleCountdown > 0)
         {
@@ -166,6 +146,46 @@ public class PlayerController : MonoBehaviour
             DeathCycle();
         }
     }
+
+    #endregion
+
+    #region Public Methods
+    public float GetBulletSpeed()
+    {
+        return maxBulletSpeed;
+    }
+    public void SetDamage(float damage)
+    {
+        if (!_isDashing)
+        {
+            if (_animManager != null)
+                _animManager.SetAnimationId("isHit", true, 0.1f);
+            _hitEffect.SetActive(true);
+            Invoke("ClearHitEffect", 0.5f);
+            _isDying = _healthManager.SetDamage(damage);
+        }
+    }
+    #endregion
+
+    #region Private Methods
+    private void Fire(InputAction.CallbackContext obj)
+    {
+        if (!_isGrabbing)
+        {
+            Instantiate(_bullet, _muzzle.position, _muzzle.transform.rotation);
+            _muzzle.gameObject.SetActive(true);
+            _muzzleCountdown = MAX_MUZZLE_TIME;
+        }
+    }
+    private void Dash(InputAction.CallbackContext obj)
+    {
+        if (!_isDashing)
+        {
+            if (_movementInput.magnitude > 0.1f)
+                StartDash();
+        }
+    }
+
     private void ManageEnemyGrab()
     {
         Debug.DrawRay(_grabPoint.transform.position, _muzzle.transform.right * grabLength, Color.red);
@@ -188,7 +208,7 @@ public class PlayerController : MonoBehaviour
                     if (enemy != null)
                     {
                         // Check if enemy is transformed
-                        if (!enemy.DisableHabilities(_muzzle.transform, _grabPoint)) 
+                        if (!enemy.DisableHabilities(_muzzle.transform, _grabPoint))
                         {
                             _grabbedEnemy = null;
                             enemy = null;
@@ -204,7 +224,7 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
-        else 
+        else
         {
             if (_grabAimParticle != null)
             {
@@ -223,7 +243,7 @@ public class PlayerController : MonoBehaviour
     }
     private void MovePlayer()
     {
-        _speed = _isDashing ? ManageDashSpeed() : ManageRunSpeed();
+        _speed = _isDashing ? maxDashSpeed : ManageRunSpeed();
         GetComponent<Rigidbody2D>().velocity = _movementInput.normalized * _speed;
     }
     private void RotatePlayer()
@@ -260,59 +280,34 @@ public class PlayerController : MonoBehaviour
             if (_timeElapsed > lerpTime) _timeElapsed = lerpTime;
         }
         else _timeElapsed = 0;
-        return Mathf.Lerp(0.0f, maxSpeed,_timeElapsed / lerpTime);
-    }
-    private float ManageDashSpeed()
-    {
-        _dashingTimeElapsed += Time.deltaTime;
-        if (_dashingTimeElapsed > maxDashTime)
-            StopDash();
-        return maxDashSpeed;
+        return Mathf.Lerp(0.0f, maxSpeed, _timeElapsed / lerpTime);
     }
 
     private void StartDash()
     {
         _isDashing = true;
         transform.Translate(_movementInput.normalized * maxDashSpeed * Time.deltaTime, Space.World);
+        TimerManager.active.AddTimer(maxDashTime, () =>
+        {
+            StopDash();
+        }, false);
     }
     private void StopDash()
     {
         _isDashing = false;
-        _dashingTimeElapsed = 0;
     }
-    public float GetBulletSpeed()
-    {
-        return maxBulletSpeed;
-    }
-
-    public void SetDamage(float damage)
-    {
-        if (!_isDashing)
-        {
-            _animManager.SetAnimationId("isHit", true, 0.1f);
-            _hitEffect.SetActive(true);
-            Invoke("ClearHitEffect", 0.5f);
-            _isDying = _healthManager.SetDamage(damage);
-        }
-    }
-
-    void ClearHitEffect()
+    private void ClearHitEffect()
     {
         _hitEffect.SetActive(false);
     }
-    //void ClearHitAnimationID()
-    //{
-    //    _anim.SetBool("isHit", false);
-    //}
     private void DeathCycle()
     {
         GetComponent<Rigidbody2D>().isKinematic = true;
         OnDisable();
-
-        _dieTimeElapsed += Time.deltaTime;
-        if (_dieTimeElapsed > _maxDieTime)
+        TimerManager.active.AddTimer(_maxDieTime, () =>
         {
             SceneManager.LoadScene("Level1");
-        }
+        }, false);
     }
+    #endregion
 }
