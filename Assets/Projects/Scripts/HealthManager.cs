@@ -28,7 +28,7 @@ public class HealthManager : MonoBehaviour
     public bool SetDamage(float damage)
     {
         _health -= damage;
-        if (_health < 0)
+        if (_health <= 0)
             return true;
 
         return false;

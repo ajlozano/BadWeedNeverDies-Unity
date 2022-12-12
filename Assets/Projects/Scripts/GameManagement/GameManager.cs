@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,12 +12,15 @@ public class GameManager : MonoBehaviour
     public int _maxEnemiesInScene = 4;
     public float _maxTimeToSpawn = 5;
     [Header("Objects")]
-    public GameObject enemy;
+    public GameObject enemy1;
+    public GameObject enemy2;
+    public GameObject enemy3;
     public GameObject particle;
     #endregion
 
     #region Private Properties
     private GameObject _player;
+    private List<GameObject> _enemyList;
     // Delta time
     private float _timeToNextSpawn = 0;
     private bool _isSpawning = true;
@@ -26,11 +31,16 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         _player = GameObject.Find("Player");
+        _enemyList = new List<GameObject>();
+        _enemyList.Add(enemy1);
+        _enemyList.Add(enemy2);
+        _enemyList.Add(enemy3);
     }
     void Start()
     {
         Invoke("SpawnParticle", 2f);
     }
+
     private void FixedUpdate()
     {
         if (!_isSpawning)
@@ -77,6 +87,7 @@ public class GameManager : MonoBehaviour
     }
     private void SpawnEnemy()
     {
+        GameObject enemy = _enemyList[Random.Range(0, _enemyList.Count)];
         if (enemy != null)
         {
             Instantiate(enemy, _spawnPos, Quaternion.identity);
@@ -84,6 +95,20 @@ public class GameManager : MonoBehaviour
             _timeToNextSpawn = Random.Range(1f, _maxTimeToSpawn);
             _isSpawning = false;
         }
+    }
+    public void pauseGame(bool pause)
+    {
+        if (pause)
+        {
+            Time.timeScale = 0;
+        }
+        else
+        {
+            Time.timeScale = 1;
+        }
+        //filterMenuPanel.gameObject.SetActive(pause);
+        //pauseTextCanvas.gameObject.SetActive(pause);
+        //startTextCanvas.gameObject.SetActive(false);
     }
     #endregion
 

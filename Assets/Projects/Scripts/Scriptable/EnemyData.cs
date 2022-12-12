@@ -7,7 +7,6 @@ public class EnemyData : ScriptableObject
 {
     #region Public Properties
     public float maxSpeed;
-    public float maxRotationSlerp;
     public float maxTimeThrowing;
     public float maxSpeedThrowing;
     public float maxTimeToTransform;

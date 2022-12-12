@@ -10,15 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0e6810996d3d73840bfcf6ff0139af3b, type: 3}
-  m_Name: Enemy1
+  m_Name: Enemy3
   m_EditorClassIdentifier: 
-  maxSpeed: 5
-  maxRotationSlerp: 5
+  maxSpeed: 7
   maxTimeThrowing: 1
   maxSpeedThrowing: 30
   maxTimeToTransform: 10
-  damageSet: 30
-  damageGet: 20
+  damageSet: 40
+  damageGet: 10
   deathParticle: {fileID: 141433446842962269, guid: 3b4ddb7be69a228488cc37f1dd3fdfd8,
     type: 3}
   teleportParticle: {fileID: 2708598583397607911, guid: d18f35d2aca9a7945b36e55fbb09f79c,

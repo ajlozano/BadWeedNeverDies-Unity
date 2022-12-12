@@ -54,6 +54,18 @@ public class EnemyBehavior : MonoBehaviour
         }, false);
     }
 
+    private void Update()
+    {
+        if (_isDying)
+        {
+            if (!_oneTime)
+            {
+                DeathCycle();
+                _oneTime = true;
+            }
+        }
+    }
+
     private void FixedUpdate()
     {
         if ((!_isGrabbed) && (!_isThrowing))
@@ -61,14 +73,6 @@ public class EnemyBehavior : MonoBehaviour
             if ((_player != null) && (!_isDying))
             {
                 MoveEnemy();
-            }
-            if ((_isDying) && (!_isTransformed))
-            {
-                if (!_oneTime)
-                {
-                    DeathCycle();
-                    _oneTime = true;
-                }
             }
         }
         if (_isThrowing)
@@ -179,6 +183,9 @@ public class EnemyBehavior : MonoBehaviour
         GetComponent<Rigidbody2D>().isKinematic = true;
         transform.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
 
+        if (_animManager != null)
+            _animManager.SetAnimationId("isDying", _isDying);
+
         TimerManager.active.AddTimer(_maxDestroyTime, () =>
         {
             if (enemyData.deathParticle != null)
@@ -188,9 +195,6 @@ public class EnemyBehavior : MonoBehaviour
             }
             Destroy(this.gameObject);
         }, false);
-
-        if (_animManager != null)
-            _animManager.SetAnimationId("isDying", _isDying);
     }
 
     private void Teleport()
