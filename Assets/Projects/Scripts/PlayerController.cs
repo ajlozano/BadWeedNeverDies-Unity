@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -24,8 +25,8 @@ public class PlayerController : MonoBehaviour
     #endregion
 
     #region Private Properties
-    private const float MAX_MUZZLE_TIME = 0.1f;
     // Player
+    private const float MAX_MUZZLE_TIME = 0.1f;
     private float _speed = 0.0f;
     private Vector2 _movementInput = Vector2.zero;
     private Vector2 _aimInput = Vector2.zero;
@@ -34,6 +35,9 @@ public class PlayerController : MonoBehaviour
     private bool _isDying = false;
     private int _layerMask;  //User layer 2
 
+    // UI
+    private bool _isPaused = false;
+
     // Delta time
     private float _timeElapsed = 0;
     private float _muzzleCountdown = 0;
@@ -41,22 +45,26 @@ public class PlayerController : MonoBehaviour
 
     // Objects
     //Gamepad gamepad;
-    GameObject _grabbedEnemy;
-    Camera _cam;
-    PlayerInputActions _playerControls;
-    GameObject _grabPoint;
-    GameObject _weapon;
-    GameObject _body;
-    GameObject _grabAimParticle;
-    GameObject _hitEffect;
-    Transform _muzzle;
-    InputAction _move;
-    InputAction _aim;
-    InputAction _fire;
-    InputAction _dash;
-    InputAction _grab;
-    HealthManager _healthManager;
-    AnimationManager _animManager;
+    private GameObject _grabbedEnemy;
+    private Camera _cam;
+    private PlayerInputActions _playerControls;
+    private GameObject _grabPoint;
+    private GameObject _weapon;
+    private GameObject _body;
+    private GameObject _grabAimParticle;
+    private GameObject _hitEffect;
+    private Transform _muzzle;
+    private HealthManager _healthManager;
+    private AnimationManager _animManager;
+    private GameManager _gameManager;
+
+    private InputAction _move;
+    private InputAction _aim;
+    private InputAction _fire;
+    private InputAction _dash;
+    private InputAction _grab;
+    private InputAction _pause;
+    private InputAction _exit;
     #endregion
 
     #region Main Methods
@@ -67,39 +75,49 @@ public class PlayerController : MonoBehaviour
         _weapon = this.transform.Find("Weapon").gameObject;
         _body = this.transform.Find("Body").gameObject;
         _muzzle = _weapon.transform.Find("Muzzle");
-        _muzzle.gameObject.SetActive(false);
         _grabPoint = _weapon.transform.Find("Crosshair").gameObject;
         _animManager = this.GetComponent<AnimationManager>();
         _grabAimParticle = _weapon.transform.Find("GrabParticle").gameObject;
         _hitEffect = this.transform.Find("HitEffect").gameObject;
         _healthManager = this.GetComponent<HealthManager>();
+        _gameManager = GameObject.Find("GameSystem").GetComponent<GameManager>();
     }
-    private void OnEnable()
+    public void OnEnable()
     {
         _move = _playerControls.Player.Move;
         _aim = _playerControls.Player.Aim;
         _fire = _playerControls.Player.Fire;
         _dash = _playerControls.Player.Dash;
         _grab = _playerControls.Player.Grab;
+        _pause = _playerControls.UI.Pause;
+        _exit = _playerControls.UI.Exit;
 
         _move.Enable();
         _aim.Enable();
         _fire.Enable();
         _dash.Enable();
         _grab.Enable();
+        _pause.Enable();
+        _exit.Enable();
 
         _fire.performed += Fire;
         _dash.performed += Dash;
+        _pause.performed += Pause;
+        _exit.performed += Exit;
     }
-    private void OnDisable()
+
+    public void OnDisable()
     {
         _move.Disable();
         _fire.Disable();
         _dash.Disable();
         _grab.Disable();
+       // _pause.Disable();
+        _exit.Disable();
     }
     void Start()
     {
+        _muzzle.gameObject.SetActive(false);
         if (_grabAimParticle != null) _grabAimParticle.SetActive(false);
         if (_hitEffect != null) _hitEffect.SetActive(false);
         // I don't know why, move 1 more bit to left is needed for correct layer mask.
@@ -184,6 +202,18 @@ public class PlayerController : MonoBehaviour
             if (_movementInput.magnitude > 0.1f)
                 StartDash();
         }
+    }
+    private void Pause(InputAction.CallbackContext obj)
+    {
+        if (_gameManager != null)
+        {
+            _isPaused = !_isPaused;
+            _gameManager.PauseGame(_isPaused);
+        }
+    }
+    private void Exit(InputAction.CallbackContext obj)
+    {
+        _gameManager.ExitToMainMenu();
     }
 
     private void ManageEnemyGrab()

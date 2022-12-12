@@ -7,14 +7,15 @@ using UnityEngine.UI;
 
 public class HUDManager : MonoBehaviour
 {
+    #region Private Properties
     private double runningTime = 0;
     private TimeSpan timeSpan;
     private Transform timeTextCanvas;
+    #endregion
+    #region Main Methods
     void Start()
     {
-        //Time.timeScale = 0;
         timeTextCanvas = transform.Find("RunningTime");
-        print(timeTextCanvas.transform.position);
     }
 
     private void Update()
@@ -27,4 +28,5 @@ public class HUDManager : MonoBehaviour
             timeTextCanvas.gameObject.GetComponent<TextMeshProUGUI>().text = timeText;
         }
     }
+    #endregion
 }

@@ -1,7 +1,9 @@
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -21,16 +23,19 @@ public class GameManager : MonoBehaviour
     #region Private Properties
     private GameObject _player;
     private List<GameObject> _enemyList;
+    private Canvas _canvas;
     // Delta time
     private float _timeToNextSpawn = 0;
     private bool _isSpawning = true;
     private Vector3 _spawnPos;
+    private float _fadeTime = 0.5f;
     #endregion
 
     #region Main Methods
     private void Awake()
     {
         _player = GameObject.Find("Player");
+        _canvas = GameObject.FindObjectOfType<Canvas>();
         _enemyList = new List<GameObject>();
         _enemyList.Add(enemy1);
         _enemyList.Add(enemy2);
@@ -38,7 +43,12 @@ public class GameManager : MonoBehaviour
     }
     void Start()
     {
-        Invoke("SpawnParticle", 2f);
+        Invoke("FadeStart", _fadeTime);
+        if (_canvas != null)
+        {
+            _canvas.transform.Find("PanelToFade").gameObject.SetActive(true);
+            _canvas.transform.Find("PanelToFade").GetComponent<CanvasGroup>().DOFade(0, _fadeTime);
+        }
     }
 
     private void FixedUpdate()
@@ -52,9 +62,41 @@ public class GameManager : MonoBehaviour
     #endregion
 
     #region Public Methods
+    public void PauseGame(bool pause)
+    {
+        if (pause)
+        {
+            _canvas.transform.Find("PauseScreen").gameObject.SetActive(true);
+            _player.GetComponent<PlayerController>().OnDisable();
+            Time.timeScale = 0;
+        }
+        else
+        {
+            Time.timeScale = 1;
+            _canvas.transform.Find("PauseScreen").gameObject.SetActive(false);
+            _player.GetComponent<PlayerController>().OnEnable();
+        }
+    }
+    public void ExitToMainMenu()
+    {
+        Invoke("FadeEnd", _fadeTime);
+        if (_canvas != null)
+        {
+            _canvas.transform.Find("PanelToFade").GetComponent<CanvasGroup>().DOFade(1, _fadeTime);
+        }
+    }
+    public void ExitFromPause()
+    {
+        Time.timeScale = 1;
+        FadeEnd();
+    }
     #endregion
 
     #region Private Methods
+    private void FadeStart()
+    {
+        Invoke("SpawnParticle", 2f);
+    }
     private void SpawnParticle()
     {
         GameObject[] enemiesSpawned = GameObject.FindGameObjectsWithTag("Enemy");
@@ -96,20 +138,11 @@ public class GameManager : MonoBehaviour
             _isSpawning = false;
         }
     }
-    public void pauseGame(bool pause)
+    private void FadeEnd()
     {
-        if (pause)
-        {
-            Time.timeScale = 0;
-        }
-        else
-        {
-            Time.timeScale = 1;
-        }
-        //filterMenuPanel.gameObject.SetActive(pause);
-        //pauseTextCanvas.gameObject.SetActive(pause);
-        //startTextCanvas.gameObject.SetActive(false);
+        SceneManager.LoadScene("MainMenu");
     }
+
     #endregion
 
 
