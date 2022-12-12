@@ -254,7 +254,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyData: {fileID: 11400000, guid: 16ce4e2fdda6d5e43a80c9d0ebedee5a, type: 2}
-  _maxDestroyTime: 1
+  spawn: {fileID: 8300000, guid: e8d9d8542c7047e4d9ab8546bef50de6, type: 3}
+  throwItself: {fileID: 8300000, guid: fc75de1a480ec4d49a5bda7a4d4115c5, type: 3}
+  teleport: {fileID: 8300000, guid: 72409dc5e6072524093be7a085687945, type: 3}
+  deathExplosion: {fileID: 8300000, guid: d969327206136ee41baf00619fc7242b, type: 3}
+  hit: {fileID: 8300000, guid: d6bc7bda77e871d4fb50b9c0f8acdd27, type: 3}
 --- !u!114 &7740966371589817688
 MonoBehaviour:
   m_ObjectHideFlags: 0

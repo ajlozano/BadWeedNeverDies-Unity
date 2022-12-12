@@ -7,6 +7,14 @@ public class EnemyBehavior : MonoBehaviour
     // Edit in inspector
     [Header("Enemy properties")]
     public EnemyData enemyData;
+    // Audio Clips
+    [Header("Enemy Audio Clips")]
+    public AudioClip spawn;
+    public AudioClip throwItself;
+    public AudioClip teleport;
+    public AudioClip deathExplosion;
+    public AudioClip hit;
+
     #endregion
 
     #region Private Properties
@@ -19,7 +27,7 @@ public class EnemyBehavior : MonoBehaviour
 
     // Delta time
     //public float _destroyTimeElapsed = 0;
-    public float _maxDestroyTime = 1f;
+    private float _maxDestroyTime = 1f;
     private float _timeToHitElapsed = 0;
     private float _maxTimeToHit = 1f;
 
@@ -41,6 +49,8 @@ public class EnemyBehavior : MonoBehaviour
         _grabAimParticle.SetActive(false);
         _healthManager = this.GetComponent<HealthManager>();
         _animManager = this.GetComponent<AnimationManager>();
+        AudioManager.instance.ExecuteSound(spawn);
+
     }
 
     private void Start()
@@ -52,6 +62,7 @@ public class EnemyBehavior : MonoBehaviour
                 TransformMode();
             }
         }, false);
+
     }
 
     private void Update()
@@ -144,6 +155,8 @@ public class EnemyBehavior : MonoBehaviour
     }
     public void EnableHabilities()
     {
+        AudioManager.instance.ExecuteSound(throwItself);
+
         GetComponent<Rigidbody2D>().isKinematic = false;
         GetComponent<Rigidbody2D>().simulated = true;
         transform.SetParent(null);
@@ -158,6 +171,7 @@ public class EnemyBehavior : MonoBehaviour
     {
         if (!_isTransformed)
         {
+            AudioManager.instance.ExecuteSound(hit);
             if (_animManager != null)
                 _animManager.SetAnimationId("isHit", true, 0.1f);
             _isDying = _healthManager.SetDamage(enemyData.damageGet);
@@ -178,6 +192,7 @@ public class EnemyBehavior : MonoBehaviour
 
     private void DeathCycle()
     {
+
         _grabAimParticle.SetActive(false);
 
         GetComponent<Rigidbody2D>().isKinematic = true;
@@ -190,6 +205,8 @@ public class EnemyBehavior : MonoBehaviour
         {
             if (enemyData.deathParticle != null)
             {
+                AudioManager.instance.ExecuteSound(deathExplosion);
+
                 GameObject particle = Instantiate(enemyData.deathParticle, transform.position, transform.rotation);
                 Destroy(particle, 1f);
             }
@@ -201,6 +218,8 @@ public class EnemyBehavior : MonoBehaviour
     {
         if (enemyData.teleportParticle != null)
         {
+            AudioManager.instance.ExecuteSound(teleport);
+
             GameObject particle = Instantiate(enemyData.teleportParticle, transform.position, transform.rotation);
             Destroy(particle, 1f);
         }

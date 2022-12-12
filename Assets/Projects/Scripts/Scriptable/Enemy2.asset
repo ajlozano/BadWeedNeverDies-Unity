@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e6810996d3d73840bfcf6ff0139af3b, type: 3}
   m_Name: Enemy2
   m_EditorClassIdentifier: 
-  maxSpeed: 6
+  maxSpeed: 7
   maxTimeThrowing: 1
   maxSpeedThrowing: 30
   maxTimeToTransform: 8
