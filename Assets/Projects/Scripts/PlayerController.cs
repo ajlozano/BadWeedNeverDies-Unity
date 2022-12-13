@@ -34,6 +34,7 @@ public class PlayerController : MonoBehaviour
     private bool _isGrabbing = false;
     private bool _isDying = false;
     private int _layerMask;  //User layer 2
+    private Vector3 _PreviousPosition = Vector3.zero;
 
     // UI
     private bool _isPaused = false;
@@ -51,7 +52,6 @@ public class PlayerController : MonoBehaviour
     private float _maxDieTime = 1f;
 
     // Objects
-    //Gamepad gamepad;
     private GameObject _grabbedEnemy;
     private Camera _cam;
     private PlayerInputActions _playerControls;
@@ -72,6 +72,8 @@ public class PlayerController : MonoBehaviour
     private InputAction _grab;
     private InputAction _pause;
     private InputAction _exit;
+    private bool _isGamepad;
+    private InputBinding _aimMouseBinding;
     #endregion
 
     #region Main Methods
@@ -139,6 +141,7 @@ public class PlayerController : MonoBehaviour
         // Other actions must be placed as a coroutine.
         _movementInput = _move.ReadValue<Vector2>();
         _aimInput = _aim.ReadValue<Vector2>();
+        print(_aimInput);
         _isGrabbing = _grab.IsPressed();
 
     }
@@ -189,9 +192,20 @@ public class PlayerController : MonoBehaviour
             Invoke("ClearHitEffect", 0.5f);
             _isDying = _healthManager.SetDamage(damage);
             if(!_isDying) AudioManager.instance.ExecuteSound(_hitClip);
-            else  AudioManager.instance.ExecuteSound(_deathClip);
-
+            else AudioManager.instance.ExecuteSound(_deathClip);
         }
+    }
+
+    public void OnDeviceChange(PlayerInput pi)
+    {
+        _isGamepad = pi.currentControlScheme.Equals("Gamepad") ? true : false;
+        if (_isGamepad)
+        {
+            _aimMouseBinding = _aim.ChangeBinding(1).binding;
+            _aim.ChangeBinding(1).Erase();
+        }
+        else
+            _aim.AddBinding(_aimMouseBinding);
     }
     #endregion
 
@@ -301,15 +315,30 @@ public class PlayerController : MonoBehaviour
     }
     private void RotatePlayer()
     {
-        /*** for mouse cursor rotation ***/
-        Vector3 position = _cam.ScreenToWorldPoint(new Vector3(_aimInput.x, _aimInput.y, 0.0f));
-        Vector3 aimingEuler = new Vector3(0, 0, Mathf.Atan2(position.y - transform.position.y,
-             position.x - transform.position.x) * Mathf.Rad2Deg);
+        Vector3 currentPosition = Vector3.zero;
+        Vector3 aimingEuler = Vector3.zero;
 
-        /*** for gamepad rotation ***/
-        //Vector3 position = _aim.ReadValue<Vector2>().normalized;
-        //if (position != Vector3.zero)
-        //    aimingEuler = new Vector3(0, 0, Mathf.Atan2(position.y, position.x) * Mathf.Rad2Deg);
+        if (_isGamepad)
+        {
+            /*** for gamepad rotation ***/
+            if (Mathf.Abs(_aimInput.normalized.x) > 0.8f || (Mathf.Abs(_aimInput.normalized.y) > 0.8f))
+                currentPosition = _aimInput.normalized;
+            else
+                currentPosition = _PreviousPosition;
+            //print(_aimInput);
+
+            if (currentPosition != Vector3.zero)
+                aimingEuler = new Vector3(0, 0, Mathf.Atan2(currentPosition.y, currentPosition.x) * Mathf.Rad2Deg);
+
+            _PreviousPosition = currentPosition;
+        }
+        else
+        {
+            /*** for mouse cursor rotation ***/
+            currentPosition = _cam.ScreenToWorldPoint(new Vector3(_aimInput.x, _aimInput.y, 0.0f));
+            aimingEuler = new Vector3(0, 0, Mathf.Atan2(currentPosition.y - transform.position.y,
+                 currentPosition.x - transform.position.x) * Mathf.Rad2Deg);
+        }
 
         if ((aimingEuler.z > 90) || (aimingEuler.z < -90))
         {
@@ -356,6 +385,7 @@ public class PlayerController : MonoBehaviour
     private void DeathCycle()
     {
         GetComponent<Rigidbody2D>().isKinematic = true;
+        GetComponent<Rigidbody2D>().simulated = false;
         OnDisable();
         TimerManager.active.AddTimer(_maxDieTime, () =>
         {
