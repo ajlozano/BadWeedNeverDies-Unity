@@ -38,6 +38,13 @@ public class PlayerController : MonoBehaviour
     // UI
     private bool _isPaused = false;
 
+    [Header("Player Audio Clips")]
+    // Audio clips
+    [SerializeField] private AudioClip _fireClip;
+    [SerializeField] private AudioClip _dashClip;
+    [SerializeField] private AudioClip _deathClip;
+    [SerializeField] private AudioClip _hitClip;
+
     // Delta time
     private float _timeElapsed = 0;
     private float _muzzleCountdown = 0;
@@ -102,10 +109,10 @@ public class PlayerController : MonoBehaviour
 
         _fire.performed += Fire;
         _dash.performed += Dash;
+        _grab.performed += Grab;
         _pause.performed += Pause;
         _exit.performed += Exit;
     }
-
     public void OnDisable()
     {
         _move.Disable();
@@ -181,6 +188,9 @@ public class PlayerController : MonoBehaviour
             _hitEffect.SetActive(true);
             Invoke("ClearHitEffect", 0.5f);
             _isDying = _healthManager.SetDamage(damage);
+            if(!_isDying) AudioManager.instance.ExecuteSound(_hitClip);
+            else  AudioManager.instance.ExecuteSound(_deathClip);
+
         }
     }
     #endregion
@@ -193,6 +203,7 @@ public class PlayerController : MonoBehaviour
             Instantiate(_bullet, _muzzle.position, _muzzle.transform.rotation);
             _muzzle.gameObject.SetActive(true);
             _muzzleCountdown = MAX_MUZZLE_TIME;
+            AudioManager.instance.ExecuteSound(_fireClip);
         }
     }
     private void Dash(InputAction.CallbackContext obj)
@@ -200,8 +211,17 @@ public class PlayerController : MonoBehaviour
         if (!_isDashing)
         {
             if (_movementInput.magnitude > 0.1f)
+            {
+                AudioManager.instance.ExecuteSound(_dashClip);
                 StartDash();
+
+            }
         }
+    }
+    private void Grab(InputAction.CallbackContext obj)
+    {
+        // Play grab sound
+        _grabPoint.GetComponent<AudioSource>().Play();   
     }
     private void Pause(InputAction.CallbackContext obj)
     {
@@ -256,6 +276,9 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+            // Stop Grab sound
+            _grabPoint.GetComponent<AudioSource>().Stop();
+
             if (_grabAimParticle != null)
             {
                 _grabAimParticle.SetActive(false);
@@ -336,7 +359,8 @@ public class PlayerController : MonoBehaviour
         OnDisable();
         TimerManager.active.AddTimer(_maxDieTime, () =>
         {
-            SceneManager.LoadScene("Level1");
+            _gameManager.ExitFromPause();
+            //SceneManager.LoadScene("Level1");
         }, false);
     }
     #endregion

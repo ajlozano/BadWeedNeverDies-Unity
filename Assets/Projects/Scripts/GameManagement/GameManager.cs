@@ -24,6 +24,11 @@ public class GameManager : MonoBehaviour
     private GameObject _player;
     private List<GameObject> _enemyList;
     private Canvas _canvas;
+
+    //Audio clips
+    [SerializeField] private AudioClip _pauseClip;
+    [SerializeField] private AudioClip _unPauseClip;
+
     // Delta time
     private float _timeToNextSpawn = 0;
     private bool _isSpawning = true;
@@ -68,6 +73,7 @@ public class GameManager : MonoBehaviour
         {
             _canvas.transform.Find("PauseScreen").gameObject.SetActive(true);
             _player.GetComponent<PlayerController>().OnDisable();
+            AudioManager.instance.ExecuteSound(_pauseClip);
             Time.timeScale = 0;
         }
         else
@@ -75,6 +81,7 @@ public class GameManager : MonoBehaviour
             Time.timeScale = 1;
             _canvas.transform.Find("PauseScreen").gameObject.SetActive(false);
             _player.GetComponent<PlayerController>().OnEnable();
+            AudioManager.instance.ExecuteSound(_unPauseClip);
         }
     }
     public void ExitToMainMenu()
@@ -82,6 +89,7 @@ public class GameManager : MonoBehaviour
         Invoke("FadeEnd", _fadeTime);
         if (_canvas != null)
         {
+            AudioManager.instance.ExecuteSound(_unPauseClip);
             _canvas.transform.Find("PanelToFade").GetComponent<CanvasGroup>().DOFade(1, _fadeTime);
         }
     }

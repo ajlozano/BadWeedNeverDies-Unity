@@ -17,6 +17,7 @@ public class MenuManager : MonoBehaviour
     #region Private Properties
     private Canvas _canvas;
     private float _fadeTime = 0.5f;
+    [SerializeField] private AudioClip _clickMenu;
     #endregion
     #region Main Methods
     private void Awake()
@@ -38,6 +39,8 @@ public class MenuManager : MonoBehaviour
             _canvas.transform.Find("PanelToFade").gameObject.SetActive(true);
             _canvas.transform.Find("PanelToFade").GetComponent<CanvasGroup>().DOFade(1, _fadeTime);
         }
+
+        AudioManager.instance.ExecuteSound(_clickMenu);
 
         Invoke("StartGame", _fadeTime);
     }

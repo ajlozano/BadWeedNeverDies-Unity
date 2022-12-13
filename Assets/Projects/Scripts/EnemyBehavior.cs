@@ -7,14 +7,6 @@ public class EnemyBehavior : MonoBehaviour
     // Edit in inspector
     [Header("Enemy properties")]
     public EnemyData enemyData;
-    // Audio Clips
-    [Header("Enemy Audio Clips")]
-    public AudioClip spawn;
-    public AudioClip throwItself;
-    public AudioClip teleport;
-    public AudioClip deathExplosion;
-    public AudioClip hit;
-
     #endregion
 
     #region Private Properties
@@ -24,6 +16,14 @@ public class EnemyBehavior : MonoBehaviour
     private bool _isGrabbed = false;
     private bool _isThrowing = false;
     private bool _oneTime = false;
+
+    // Audio Clips
+    [Header("Enemy Audio Clips")]
+    [SerializeField] public AudioClip spawn;
+    [SerializeField] public AudioClip throwItself;
+    [SerializeField] public AudioClip teleport;
+    [SerializeField] public AudioClip deathExplosion;
+    [SerializeField] public AudioClip hit;
 
     // Delta time
     //public float _destroyTimeElapsed = 0;
