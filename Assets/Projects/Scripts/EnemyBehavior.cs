@@ -116,6 +116,10 @@ public class EnemyBehavior : MonoBehaviour
             target.GetComponent<PlayerBehavior>().SetDamage(enemyData.damageSet);
             _timeToHitElapsed = 0f;
         }
+        else if (!_isThrowing && target.tag == "Lightning" && !_isDying)
+        {
+            _isDying = true;
+        }
     }
     private void OnTriggerStay2D(Collider2D collision)
     {

@@ -15,7 +15,7 @@ MonoBehaviour:
   maxSpeed: 5
   maxTimeThrowing: 1
   maxSpeedThrowing: 30
-  maxTimeToTransform: 5
+  maxTimeToTransform: 4
   damageSet: 20
   damageGet: 30
   deathParticle: {fileID: 141433446842962269, guid: 3b4ddb7be69a228488cc37f1dd3fdfd8,

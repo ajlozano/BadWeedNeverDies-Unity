@@ -9,6 +9,7 @@ TagManager:
   - FxTemporaire
   - Transparent
   - Altar
+  - Lightning
   layers:
   - Default
   - TransparentFX
@@ -16,7 +17,7 @@ TagManager:
   - Enemy
   - Water
   - UI
-  - 
+  - Particles
   - 
   - 
   - 
@@ -54,4 +55,7 @@ TagManager:
     locked: 0
   - name: Layer 3
     uniqueID: 4189426099
+    locked: 0
+  - name: Particles
+    uniqueID: 320202235
     locked: 0
