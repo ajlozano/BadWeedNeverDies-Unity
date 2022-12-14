@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
-public class PlayerController : MonoBehaviour
+public class PlayerBehavior : MonoBehaviour
 {
     #region Public Properties
     // Edit on Inspector
@@ -27,6 +27,7 @@ public class PlayerController : MonoBehaviour
     #region Private Properties
     // Player
     private const float MAX_MUZZLE_TIME = 0.1f;
+    private const float ABS_AIMING_DEAD_ZONE = 0.5f;
     private float _speed = 0.0f;
     private Vector2 _movementInput = Vector2.zero;
     private Vector2 _aimInput = Vector2.zero;
@@ -73,7 +74,7 @@ public class PlayerController : MonoBehaviour
     private InputAction _pause;
     private InputAction _exit;
     private bool _isGamepad;
-    private InputBinding _aimMouseBinding;
+    private InputBinding _aimMouseBinding = new InputBinding();
     #endregion
 
     #region Main Methods
@@ -141,7 +142,6 @@ public class PlayerController : MonoBehaviour
         // Other actions must be placed as a coroutine.
         _movementInput = _move.ReadValue<Vector2>();
         _aimInput = _aim.ReadValue<Vector2>();
-        print(_aimInput);
         _isGrabbing = _grab.IsPressed();
 
     }
@@ -205,7 +205,10 @@ public class PlayerController : MonoBehaviour
             _aim.ChangeBinding(1).Erase();
         }
         else
-            _aim.AddBinding(_aimMouseBinding);
+        {
+            if (_aimMouseBinding.path == "<Mouse>/position")
+                _aim.AddBinding(_aimMouseBinding);
+        }
     }
     #endregion
 
@@ -321,11 +324,10 @@ public class PlayerController : MonoBehaviour
         if (_isGamepad)
         {
             /*** for gamepad rotation ***/
-            if (Mathf.Abs(_aimInput.normalized.x) > 0.8f || (Mathf.Abs(_aimInput.normalized.y) > 0.8f))
+            if (Mathf.Abs(_aimInput.sqrMagnitude) > ABS_AIMING_DEAD_ZONE)
                 currentPosition = _aimInput.normalized;
             else
                 currentPosition = _PreviousPosition;
-            //print(_aimInput);
 
             if (currentPosition != Vector3.zero)
                 aimingEuler = new Vector3(0, 0, Mathf.Atan2(currentPosition.y, currentPosition.x) * Mathf.Rad2Deg);

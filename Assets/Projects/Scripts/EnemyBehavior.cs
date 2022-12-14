@@ -113,7 +113,7 @@ public class EnemyBehavior : MonoBehaviour
         }
         else if (!_isThrowing && target.tag == "Player" && !_isDying)
         {
-            target.GetComponent<PlayerController>().SetDamage(enemyData.damageSet);
+            target.GetComponent<PlayerBehavior>().SetDamage(enemyData.damageSet);
             _timeToHitElapsed = 0f;
         }
     }
@@ -124,7 +124,7 @@ public class EnemyBehavior : MonoBehaviour
             _timeToHitElapsed += Time.deltaTime;
             if (_timeToHitElapsed >= _maxTimeToHit)
             {
-                collision.transform.GetComponent<PlayerController>().SetDamage(enemyData.damageSet);
+                collision.transform.GetComponent<PlayerBehavior>().SetDamage(enemyData.damageSet);
                 _timeToHitElapsed = 0f;
             }
         }

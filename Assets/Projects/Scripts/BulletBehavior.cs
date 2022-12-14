@@ -19,7 +19,7 @@ public class BulletBehavior : MonoBehaviour
     #region Main Methods
     void Start()
     {
-        PlayerController playerController = GameObject.Find("Player").GetComponent<PlayerController>();
+        PlayerBehavior playerController = GameObject.Find("Player").GetComponent<PlayerBehavior>();
         _bulletSpeed = playerController.GetBulletSpeed();
     }
 

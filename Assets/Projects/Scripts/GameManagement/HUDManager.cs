@@ -26,6 +26,7 @@ public class HUDManager : MonoBehaviour
             timeSpan = TimeSpan.FromSeconds(runningTime);
             string timeText = string.Format("{1:D2}:{2:D2}", timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds);
             timeTextCanvas.gameObject.GetComponent<TextMeshProUGUI>().text = timeText;
+            SceneDataTransferManager.score = timeText;
         }
     }
     #endregion

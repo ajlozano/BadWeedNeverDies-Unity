@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -72,15 +73,17 @@ public class GameManager : MonoBehaviour
         if (pause)
         {
             _canvas.transform.Find("PauseScreen").gameObject.SetActive(true);
-            _player.GetComponent<PlayerController>().OnDisable();
+            _player.GetComponent<PlayerBehavior>().OnDisable();
             AudioManager.instance.ExecuteSound(_pauseClip);
             Time.timeScale = 0;
+            //GameObject.FindObjectOfType<EventSystem>().sendNavigationEvents = true;
         }
         else
         {
+            GameObject.FindObjectOfType<EventSystem>().sendNavigationEvents = false;
             Time.timeScale = 1;
             _canvas.transform.Find("PauseScreen").gameObject.SetActive(false);
-            _player.GetComponent<PlayerController>().OnEnable();
+            _player.GetComponent<PlayerBehavior>().OnEnable();
             AudioManager.instance.ExecuteSound(_unPauseClip);
         }
     }

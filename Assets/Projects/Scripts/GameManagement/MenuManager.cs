@@ -3,6 +3,7 @@ using Microsoft.Unity.VisualStudio.Editor;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using TMPro.EditorUtilities;
 using Unity.VisualScripting;
 using UnityEditor.UI;
@@ -23,6 +24,11 @@ public class MenuManager : MonoBehaviour
     private void Awake()
     {
         _canvas = GameObject.FindObjectOfType<Canvas>();
+    }
+    private void Start()
+    {
+        _canvas.transform.Find("ScoreTime").
+            GetComponent<TextMeshProUGUI>().text = SceneDataTransferManager.score;
     }
     #endregion
     #region Private Methods
