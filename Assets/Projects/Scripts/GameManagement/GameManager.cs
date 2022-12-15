@@ -72,7 +72,6 @@ public class GameManager : MonoBehaviour
     {
         _remainingTime += Time.deltaTime;
     }
-
     private void FixedUpdate()
     {
         if (!_isSpawningEnemy)
