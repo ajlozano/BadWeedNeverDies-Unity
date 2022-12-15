@@ -46,6 +46,7 @@ public class GameManager : MonoBehaviour
     private bool _isSpawningLightning = false;
     private Vector3 _spawnPos;
     private float _fadeTime = 0.5f;
+    private bool _isGameOver = false;
     #endregion
 
     #region Main Methods
@@ -67,15 +68,9 @@ public class GameManager : MonoBehaviour
             _canvas.transform.Find("PanelToFade").GetComponent<CanvasGroup>().DOFade(0, _fadeTime);
         }
     }
-
     private void Update()
     {
         _remainingTime += Time.deltaTime;
-        if (_remainingTime > GAME_TIMEOUT)
-        {
-            AudioManager.instance.ExecuteSound(_victoryClip);
-            ExitToMainMenu();
-        }
     }
 
     private void FixedUpdate()
@@ -85,13 +80,14 @@ public class GameManager : MonoBehaviour
             Invoke("SpawnParticle", _timeToNextEnemySpawn);
             _isSpawningEnemy = true;
         }
-
+        if (_remainingTime > GAME_TIMEOUT && !_isGameOver)
+        {
+            _isGameOver = true;
+            ExitToMainMenu();
+        }
         if (_remainingTime > TIME_TO_LIGHTNING) {
-            print("entered1");
             if (!_isSpawningLightning)
             {
-                print("entered2");
-
                 Invoke("SpawnLightning", _timeToNextLightningSpawn);
                 _isSpawningLightning = true;
             }
@@ -190,7 +186,15 @@ public class GameManager : MonoBehaviour
         Invoke("FadeEnd", _fadeTime);
         if (_canvas != null)
         {
-            AudioManager.instance.ExecuteSound(_unPauseClip);
+            if (_isGameOver)
+            {
+                SceneDataTransferManager.levelCompleteText = "Level Complete!";
+                AudioManager.instance.ExecuteSound(_pauseClip);
+            }
+            else
+            {
+                AudioManager.instance.ExecuteSound(_unPauseClip);
+            }
             _canvas.transform.Find("PanelToFade").GetComponent<CanvasGroup>().DOFade(1, _fadeTime);
         }
     }

@@ -29,6 +29,8 @@ public class MenuManager : MonoBehaviour
     {
         _canvas.transform.Find("ScoreTime").
             GetComponent<TextMeshProUGUI>().text = SceneDataTransferManager.score;
+        _canvas.transform.Find("LevelCompleteText").
+            GetComponent<TextMeshProUGUI>().text = SceneDataTransferManager.levelCompleteText;
     }
     #endregion
     #region Private Methods
