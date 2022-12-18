@@ -56,8 +56,8 @@ public class GameManager : MonoBehaviour
         _canvas = GameObject.FindObjectOfType<Canvas>();
         _enemyList = new List<GameObject>();
         _enemyList.Add(enemy1);
-        _enemyList.Add(enemy2);
-        _enemyList.Add(enemy3);
+        //_enemyList.Add(enemy2);
+        //_enemyList.Add(enemy3);
     }
     void Start()
     {

@@ -133,6 +133,7 @@ GameObject:
   m_Component:
   - component: {fileID: 98868186}
   - component: {fileID: 98868185}
+  - component: {fileID: 98868187}
   m_Layer: 0
   m_Name: MenuManager
   m_TagString: Untagged
@@ -153,6 +154,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _clickMenu: {fileID: 8300000, guid: 90af692fac7fafa4ab2dad0febb92660, type: 3}
+  eventSystem: {fileID: 581057712}
 --- !u!4 &98868186
 Transform:
   m_ObjectHideFlags: 0
@@ -168,6 +170,45 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &98868187
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 98868184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actions: {fileID: -944628639613478452, guid: f354782bd794c784d8d1f87186436824,
+    type: 3}
+  m_NotificationBehavior: 2
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 0ca054a2-4585-44de-9968-9a6dd85d946a
+    m_ActionName: UI/Cancel[/Keyboard/escape]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b8536176-b98a-4051-b470-429378f4a2e1
+    m_ActionName: UI/Click[/Mouse/leftButton]
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: UI
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!1 &204810172
 GameObject:
   m_ObjectHideFlags: 0
@@ -743,15 +784,50 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 98868185}
-    - target: {fileID: 4433610879387282640, guid: c0d06d591c3c6fd4eaf7e4a77b2a35e6,
+    - target: {fileID: 4077263818300705909, guid: c0d06d591c3c6fd4eaf7e4a77b2a35e6,
         type: 3}
-      propertyPath: m_IsActive
-      value: 1
+      propertyPath: m_Name
+      value: TutorialButton
       objectReference: {fileID: 0}
-    - target: {fileID: 6604518243038963950, guid: c0d06d591c3c6fd4eaf7e4a77b2a35e6,
+    - target: {fileID: 4077263818300705914, guid: c0d06d591c3c6fd4eaf7e4a77b2a35e6,
         type: 3}
-      propertyPath: m_text
+      propertyPath: m_SizeDelta.x
+      value: 135.6596
+      objectReference: {fileID: 0}
+    - target: {fileID: 4077263818300705914, guid: c0d06d591c3c6fd4eaf7e4a77b2a35e6,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4077263818300705914, guid: c0d06d591c3c6fd4eaf7e4a77b2a35e6,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -36.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4077263818300705915, guid: c0d06d591c3c6fd4eaf7e4a77b2a35e6,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
+      objectReference: {fileID: 98868185}
+    - target: {fileID: 4077263818300705915, guid: c0d06d591c3c6fd4eaf7e4a77b2a35e6,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: Tutorial
+      objectReference: {fileID: 0}
+    - target: {fileID: 4077263819149891221, guid: c0d06d591c3c6fd4eaf7e4a77b2a35e6,
+        type: 3}
+      propertyPath: m_Text
+      value: TUTORIAL
+      objectReference: {fileID: 0}
+    - target: {fileID: 4077263819149891221, guid: c0d06d591c3c6fd4eaf7e4a77b2a35e6,
+        type: 3}
+      propertyPath: m_FontData.m_MinSize
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4077263819149891221, guid: c0d06d591c3c6fd4eaf7e4a77b2a35e6,
+        type: 3}
+      propertyPath: m_FontData.m_FontSize
+      value: 25
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c0d06d591c3c6fd4eaf7e4a77b2a35e6, type: 3}
