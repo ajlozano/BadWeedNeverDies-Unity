@@ -2160,7 +2160,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0b9c6418c1ac12246bd77bae1ecedb51, type: 2}
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -16075,13 +16075,13 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5153653750348325989, guid: d32ccce80a7c9ee4da1094ef2048165e,
         type: 3}
-      propertyPath: enemy2
-      value: 
+      propertyPath: maxTimeToEnemySpawn
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5153653750348325989, guid: d32ccce80a7c9ee4da1094ef2048165e,
         type: 3}
-      propertyPath: enemy3
-      value: 
+      propertyPath: StartTimeToenemyWave3
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 5153653750348325994, guid: d32ccce80a7c9ee4da1094ef2048165e,
         type: 3}

@@ -44,8 +44,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff20eff41ee56e64891485f775ad9528, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxEnemiesInScene: 8
-  _maxTimeToSpawn: 4
+  maxEnemiesInScene: 4
+  minTimeToEnemySpawn: 1
+  maxTimeToEnemySpawn: 4
+  minTimeToLightningSpawn: 3
+  maxTimeToLightningSpawn: 10
+  StartTimeToLightningWave: 10
+  StartTimeToEnemyWave2: 10
+  StartTimeToenemyWave3: 30
   enemy1: {fileID: 3065187114439300977, guid: 421f21dc3ead7e1469d430f14e1785bc, type: 3}
   enemy2: {fileID: 3065187114439300977, guid: 7ec3bf4e52b0f3846ad8617ddf93f27b, type: 3}
   enemy3: {fileID: 3065187114439300977, guid: 37587e097914b7242a4efcd0bf316490, type: 3}

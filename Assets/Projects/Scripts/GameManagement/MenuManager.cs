@@ -1,20 +1,8 @@
 using DG.Tweening;
-using Microsoft.Unity.VisualStudio.Editor;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
-using TMPro.EditorUtilities;
-using Unity.VisualScripting;
-using UnityEditor.UI;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
-using UnityEngine.UIElements;
-using Image = UnityEngine.UIElements.Image;
 
 public class MenuManager : MonoBehaviour
 {
@@ -50,6 +38,8 @@ public class MenuManager : MonoBehaviour
         //print("Cancel pressed");
         if (_canvas.transform.Find("TutorialPopup").gameObject.activeSelf)
             _canvas.transform.Find("TutorialPopup").gameObject.SetActive(false);
+        if (_canvas.transform.Find("ControlsPopup").gameObject.activeSelf)
+            _canvas.transform.Find("ControlsPopup").gameObject.SetActive(false);
         eventSystem.SetActive(true);
     }
     private void Start()
@@ -90,6 +80,11 @@ public class MenuManager : MonoBehaviour
     public void Tutorial()
     {
         _canvas.transform.Find("TutorialPopup").gameObject.SetActive(true);
+        eventSystem.SetActive(false);
+    }
+    public void Controls()
+    {
+        _canvas.transform.Find("ControlsPopup").gameObject.SetActive(true);
         eventSystem.SetActive(false);
     }
     #endregion

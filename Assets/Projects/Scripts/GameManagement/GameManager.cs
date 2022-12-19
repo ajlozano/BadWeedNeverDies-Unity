@@ -12,11 +12,15 @@ public class GameManager : MonoBehaviour
 {
     #region Public Properties
     [Header("Game Properties")]
-    public int _maxEnemiesInScene = 8;
-    public float _minTimeToEnemySpawn = 1f;
-    public float _maxTimeToEnemySpawn = 4f;
-    public float _minTimeToLightningSpawn = 3f;
-    public float _maxTimeToLightningSpawn = 10f;
+    public int maxEnemiesInScene = 3;
+    public float minTimeToEnemySpawn = 1f;
+    public float maxTimeToEnemySpawn = 4f;
+    public float minTimeToLightningSpawn = 3f;
+    public float maxTimeToLightningSpawn = 10f;
+    public float StartTimeToLightningWave = 10f;
+    public float StartTimeToEnemyWave2 = 20f;
+    public float StartTimeToenemyWave3 = 60f;
+
     [Header("Objects")]
     public GameObject enemy1;
     public GameObject enemy2;
@@ -37,7 +41,7 @@ public class GameManager : MonoBehaviour
 
     // Delta time
     private const float GAME_TIMEOUT = 600f; // 10 minutes;
-    private const float TIME_TO_LIGHTNING = 10f; // 10 seconds;
+
     private float _timeToNextEnemySpawn = 0f;
     private float _timeToNextLightningSpawn = 0f;
     private float _remainingTime = 0f;
@@ -47,6 +51,7 @@ public class GameManager : MonoBehaviour
     private Vector3 _spawnPos;
     private float _fadeTime = 0.5f;
     private bool _isGameOver = false;
+    private int _enemyTypeList;
     #endregion
 
     #region Main Methods
@@ -56,8 +61,10 @@ public class GameManager : MonoBehaviour
         _canvas = GameObject.FindObjectOfType<Canvas>();
         _enemyList = new List<GameObject>();
         _enemyList.Add(enemy1);
-        //_enemyList.Add(enemy2);
-        //_enemyList.Add(enemy3);
+        _enemyList.Add(enemy2);
+        _enemyList.Add(enemy3);
+
+        _enemyTypeList = 1;
     }
     void Start()
     {
@@ -79,18 +86,34 @@ public class GameManager : MonoBehaviour
             Invoke("SpawnParticle", _timeToNextEnemySpawn);
             _isSpawningEnemy = true;
         }
+        
         if (_remainingTime > GAME_TIMEOUT && !_isGameOver)
         {
             _isGameOver = true;
             ExitToMainMenu();
         }
-        if (_remainingTime > TIME_TO_LIGHTNING) {
-            if (!_isSpawningLightning)
+        else {
+            if (_remainingTime > StartTimeToLightningWave)
             {
-                Invoke("SpawnLightning", _timeToNextLightningSpawn);
-                _isSpawningLightning = true;
+                if (!_isSpawningLightning)
+                {
+                    Invoke("SpawnLightning", _timeToNextLightningSpawn);
+                    _isSpawningLightning = true;
+                }
+            }
+            if (_remainingTime > StartTimeToEnemyWave2)
+            {
+                maxEnemiesInScene = 4;
+                _enemyTypeList = _enemyList.Count - 1;
+            }
+            if (_remainingTime > StartTimeToenemyWave3)
+            {
+                maxEnemiesInScene = 8;
+                _enemyTypeList = _enemyList.Count;
             }
         }
+
+
     }
     #endregion
     #region Private Methods
@@ -101,7 +124,7 @@ public class GameManager : MonoBehaviour
     private void SpawnParticle()
     {
         GameObject[] enemiesSpawned = GameObject.FindGameObjectsWithTag("Enemy");
-        if (enemiesSpawned.Length < _maxEnemiesInScene)
+        if (enemiesSpawned.Length < maxEnemiesInScene)
         {
             if (particle != null)
             {
@@ -130,12 +153,12 @@ public class GameManager : MonoBehaviour
     }
     private void SpawnEnemy()
     {
-        GameObject enemy = _enemyList[Random.Range(0, _enemyList.Count)];
+        GameObject enemy = _enemyList[Random.Range(0, _enemyTypeList)];
         if (enemy != null)
         {
             Instantiate(enemy, _spawnPos, Quaternion.identity);
 
-            _timeToNextEnemySpawn = Random.Range(_minTimeToEnemySpawn, _maxTimeToEnemySpawn);
+            _timeToNextEnemySpawn = Random.Range(minTimeToEnemySpawn, maxTimeToEnemySpawn);
             _isSpawningEnemy = false;
         }
     }
@@ -150,7 +173,7 @@ public class GameManager : MonoBehaviour
         {
             Instantiate(lightning, _lightningSpawnPos, Quaternion.identity);
 
-            _timeToNextLightningSpawn = Random.Range(_minTimeToLightningSpawn, _maxTimeToLightningSpawn);
+            _timeToNextLightningSpawn = Random.Range(minTimeToLightningSpawn, maxTimeToLightningSpawn);
             _isSpawningLightning = false;
         }
     }
