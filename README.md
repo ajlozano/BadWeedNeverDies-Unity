@@ -1,3 +1,12 @@
-# BadWeedNeverDies-Unity
+# Bad Weed Never Dies
 
-Top Down game.
+Survive to enemy waves as long as possible! 
+Kill them before they become invincible, in which case you can grab one of them and send it to one of the dimensional portals. 
+
+Don't touch the enemies! Use dash hability to cross throw enemies without getting hurt.
+
+## Credits
+### Programming and game Design:
+- Toni Lozano Fernández | [LinkedIn](https://www.linkedin.com/in/toni-lozano-fern%C3%A1ndez/) | [Twitter](https://twitter.com/Anthonayer)
+### Art:
+- All free assets has been used for this game.
