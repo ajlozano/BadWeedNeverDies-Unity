@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e6810996d3d73840bfcf6ff0139af3b, type: 3}
+  m_Name: Enemy3
+  m_EditorClassIdentifier: 
+  maxSpeed: 6
+  maxTimeThrowing: 1
+  maxSpeedThrowing: 30
+  maxTimeToTransform: 6
+  damageSet: 40
+  damageGet: 10
+  deathParticle: {fileID: 141433446842962269, guid: 3b4ddb7be69a228488cc37f1dd3fdfd8,
+    type: 3}
+  teleportParticle: {fileID: 2708598583397607911, guid: d18f35d2aca9a7945b36e55fbb09f79c,
+    type: 3}
+  spawnParticle: {fileID: 7226888052703040409, guid: c2e6b40d11326eb4c98f085fccf9153b,
+    type: 3}
+  transformParticle: {fileID: 9027514048236820045, guid: 9147da6b2fbc6914e874c76060c32c60,
+    type: 3}
